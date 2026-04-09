@@ -1,0 +1,111 @@
+{
+  "nav": {
+    "collection": "Collectie",
+    "search": "Zoeken",
+    "statistics": "Statistieken",
+    "import": "Importeren",
+    "settings": "Instellingen"
+  },
+  "collection": {
+    "title": "Mijn Collectie",
+    "empty": "Nog geen items. Voeg je eerste item toe!",
+    "addItem": "Item Toevoegen",
+    "listView": "Lijstweergave",
+    "gridView": "Rasterweergave",
+    "total": "{count} items",
+    "filters": "Filters",
+    "clearFilters": "Filters Wissen"
+  },
+  "item": {
+    "title": "Titel",
+    "artist": "Artiest",
+    "format": "Formaat",
+    "year": "Jaar",
+    "label": "Label",
+    "publisher": "Uitgever",
+    "catalogueNumber": "Catalogusnummer",
+    "condition": "Staat",
+    "genre": "Genre",
+    "notes": "Notities",
+    "coverArt": "Albumhoes",
+    "dateAdded": "Toegevoegd op",
+    "tracks": "Nummers",
+    "trackNumber": "Nr",
+    "duration": "Duur",
+    "version": "Versie",
+    "edit": "Bewerken",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "confirmDelete": "Dit item verwijderen?",
+    "confirmDeleteBody": "Deze actie kan niet ongedaan worden gemaakt (maar je kunt het direct herstellen).",
+    "deleted": "Item verwijderd",
+    "undo": "Ongedaan maken",
+    "discId": "Schijf-ID",
+    "lookupMusicBrainz": "Opzoeken op MusicBrainz"
+  },
+  "formats": {
+    "CD": "CD",
+    "LP": "LP (Vinyl)",
+    "EP": "EP",
+    "Single": "Single",
+    "Cassette": "Cassette",
+    "Music Book": "Muziekboek",
+    "Sheet Music": "Bladmuziek",
+    "Other": "Anders"
+  },
+  "conditions": {
+    "Mint": "Nieuwstaat",
+    "Near Mint": "Bijna Nieuwstaat",
+    "VG+": "Zeer Goed+",
+    "VG": "Zeer Goed",
+    "Good": "Goed",
+    "Fair": "Redelijk",
+    "Poor": "Slecht"
+  },
+  "search": {
+    "placeholder": "Zoek titels, artiesten, labels...",
+    "noResults": "Geen resultaten voor \"{query}\"",
+    "results": "{count} resultaten"
+  },
+  "statistics": {
+    "title": "Statistieken",
+    "totalItems": "Totaal Items",
+    "byFormat": "Per Formaat",
+    "byGenre": "Per Genre",
+    "byYear": "Per Jaar"
+  },
+  "import": {
+    "title": "Importeren",
+    "txtImport": "Importeren uit TXT (oud formaat)",
+    "csvImport": "Importeren uit CSV",
+    "selectFile": "Bestand Selecteren",
+    "importing": "Bezig met importeren...",
+    "done": "Import voltooid",
+    "summary": "{imported} van {total} items geïmporteerd ({skipped} overgeslagen)",
+    "mapColumns": "Kolommen Koppelen",
+    "preview": "Voorbeeld",
+    "confirm": "Importeren"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "theme": "Thema",
+    "themeLight": "Licht",
+    "themeDark": "Donker",
+    "themeSystem": "Systeem",
+    "language": "Taal",
+    "defaultView": "Standaardweergave",
+    "startupView": "Startweergave",
+    "database": "Database",
+    "dbPath": "Databasepad",
+    "moveDb": "Database Verplaatsen",
+    "version": "Versie"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Er is een fout opgetreden",
+    "noData": "Geen gegevens",
+    "close": "Sluiten",
+    "back": "Terug"
+  }
+}

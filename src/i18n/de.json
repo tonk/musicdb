@@ -1,0 +1,12 @@
+{
+  "nav": { "collection": "Sammlung", "search": "Suche", "statistics": "Statistiken", "import": "Importieren", "settings": "Einstellungen" },
+  "collection": { "title": "Meine Sammlung", "empty": "Noch keine Einträge.", "addItem": "Eintrag Hinzufügen", "listView": "Listenansicht", "gridView": "Rasteransicht", "total": "{count} Einträge", "filters": "Filter", "clearFilters": "Filter Löschen" },
+  "item": { "title": "Titel", "artist": "Künstler", "format": "Format", "year": "Jahr", "label": "Label", "publisher": "Verlag", "catalogueNumber": "Katalognummer", "condition": "Zustand", "genre": "Genre", "notes": "Notizen", "coverArt": "Cover", "dateAdded": "Hinzugefügt", "tracks": "Titel", "trackNumber": "Nr.", "duration": "Dauer", "version": "Version", "edit": "Bearbeiten", "save": "Speichern", "cancel": "Abbrechen", "delete": "Löschen", "confirmDelete": "Eintrag löschen?", "confirmDeleteBody": "Diese Aktion kann direkt rückgängig gemacht werden.", "deleted": "Eintrag gelöscht", "undo": "Rückgängig", "discId": "Disc-ID", "lookupMusicBrainz": "Auf MusicBrainz suchen" },
+  "formats": { "CD": "CD", "LP": "LP (Vinyl)", "EP": "EP", "Single": "Single", "Cassette": "Kassette", "Music Book": "Notenheft", "Sheet Music": "Noten", "Other": "Sonstiges" },
+  "conditions": { "Mint": "Neuwertig", "Near Mint": "Fast Neuwertig", "VG+": "Sehr Gut+", "VG": "Sehr Gut", "Good": "Gut", "Fair": "Ausreichend", "Poor": "Schlecht" },
+  "search": { "placeholder": "Titel, Künstler, Labels suchen...", "noResults": "Keine Ergebnisse für \"{query}\"", "results": "{count} Ergebnisse" },
+  "statistics": { "title": "Statistiken", "totalItems": "Gesamt", "byFormat": "Nach Format", "byGenre": "Nach Genre", "byYear": "Nach Jahr" },
+  "import": { "title": "Importieren", "txtImport": "TXT importieren (Legacy)", "csvImport": "CSV importieren", "selectFile": "Datei Auswählen", "importing": "Importiere...", "done": "Import abgeschlossen", "summary": "{imported} von {total} importiert ({skipped} übersprungen)", "mapColumns": "Spalten Zuordnen", "preview": "Vorschau", "confirm": "Importieren" },
+  "settings": { "title": "Einstellungen", "theme": "Design", "themeLight": "Hell", "themeDark": "Dunkel", "themeSystem": "System", "language": "Sprache", "defaultView": "Standardansicht", "startupView": "Startansicht", "database": "Datenbank", "dbPath": "Datenbankpfad", "moveDb": "Datenbank Verschieben", "version": "Version" },
+  "common": { "loading": "Laden...", "error": "Ein Fehler ist aufgetreten", "noData": "Keine Daten", "close": "Schließen", "back": "Zurück" }
+}

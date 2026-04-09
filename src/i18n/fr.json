@@ -1,0 +1,12 @@
+{
+  "nav": { "collection": "Collection", "search": "Recherche", "statistics": "Statistiques", "import": "Importer", "settings": "Paramètres" },
+  "collection": { "title": "Ma Collection", "empty": "Aucun élément pour l'instant.", "addItem": "Ajouter un élément", "listView": "Vue liste", "gridView": "Vue grille", "total": "{count} éléments", "filters": "Filtres", "clearFilters": "Effacer les filtres" },
+  "item": { "title": "Titre", "artist": "Artiste", "format": "Format", "year": "Année", "label": "Label", "publisher": "Éditeur", "catalogueNumber": "Numéro de catalogue", "condition": "État", "genre": "Genre", "notes": "Notes", "coverArt": "Pochette", "dateAdded": "Date d'ajout", "tracks": "Pistes", "trackNumber": "N°", "duration": "Durée", "version": "Version", "edit": "Modifier", "save": "Enregistrer", "cancel": "Annuler", "delete": "Supprimer", "confirmDelete": "Supprimer cet élément ?", "confirmDeleteBody": "Vous pouvez annuler immédiatement après.", "deleted": "Élément supprimé", "undo": "Annuler", "discId": "ID du disque", "lookupMusicBrainz": "Rechercher sur MusicBrainz" },
+  "formats": { "CD": "CD", "LP": "LP (Vinyle)", "EP": "EP", "Single": "Single", "Cassette": "Cassette", "Music Book": "Livre de musique", "Sheet Music": "Partition", "Other": "Autre" },
+  "conditions": { "Mint": "Neuf", "Near Mint": "Quasi Neuf", "VG+": "Très Bon+", "VG": "Très Bon", "Good": "Bon", "Fair": "Passable", "Poor": "Mauvais" },
+  "search": { "placeholder": "Rechercher titres, artistes, labels...", "noResults": "Aucun résultat pour \"{query}\"", "results": "{count} résultats" },
+  "statistics": { "title": "Statistiques", "totalItems": "Total", "byFormat": "Par format", "byGenre": "Par genre", "byYear": "Par année" },
+  "import": { "title": "Importer", "txtImport": "Importer TXT (format hérité)", "csvImport": "Importer CSV", "selectFile": "Sélectionner un fichier", "importing": "Importation...", "done": "Import terminé", "summary": "{imported} sur {total} importés ({skipped} ignorés)", "mapColumns": "Associer les colonnes", "preview": "Aperçu", "confirm": "Importer" },
+  "settings": { "title": "Paramètres", "theme": "Thème", "themeLight": "Clair", "themeDark": "Sombre", "themeSystem": "Système", "language": "Langue", "defaultView": "Vue par défaut", "startupView": "Vue au démarrage", "database": "Base de données", "dbPath": "Chemin de la base", "moveDb": "Déplacer la base", "version": "Version" },
+  "common": { "loading": "Chargement...", "error": "Une erreur est survenue", "noData": "Aucune donnée", "close": "Fermer", "back": "Retour" }
+}
