@@ -137,6 +137,15 @@ pub fn group_into_albums(mut records: Vec<TxtRecord>) -> Vec<ImportAlbum> {
                 }
             }
 
+            let total_secs: i64 = tracks.iter()
+                .filter_map(|t| parse_duration(&t.tijd))
+                .sum();
+            let total_time = if total_secs > 0 {
+                Some(format_duration_secs(total_secs))
+            } else {
+                None
+            };
+
             ImportAlbum {
                 disc_id: first.disc_id.clone(),
                 title: first
@@ -148,6 +157,7 @@ pub fn group_into_albums(mut records: Vec<TxtRecord>) -> Vec<ImportAlbum> {
                 publisher: first.uitgever.clone(),
                 year: first.jaar,
                 category: first.category.clone(),
+                total_time,
                 artist_sort_names,
                 tracks,
             }
@@ -189,6 +199,17 @@ fn parse_duration(s: &str) -> Option<i64> {
             Some(mins * 60 + secs)
         }
         _ => None,
+    }
+}
+
+fn format_duration_secs(total: i64) -> String {
+    let h = total / 3600;
+    let m = (total % 3600) / 60;
+    let s = total % 60;
+    if h > 0 {
+        format!("{h}:{m:02}:{s:02}")
+    } else {
+        format!("{m}:{s:02}")
     }
 }
 
@@ -251,8 +272,8 @@ async fn upsert_album(db: &sqlx::SqlitePool, album: &ImportAlbum) -> Result<i64>
     } else {
         sqlx::query_scalar!(
             r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
-                                  disc_id, source_category)
-               VALUES (?, 'CD', ?, ?, ?, ?, ?, ?) RETURNING id as "id!""#,
+                                  disc_id, source_category, total_time)
+               VALUES (?, 'CD', ?, ?, ?, ?, ?, ?, ?) RETURNING id as "id!""#,
             album.title,
             album.year,
             album.label,
@@ -260,6 +281,7 @@ async fn upsert_album(db: &sqlx::SqlitePool, album: &ImportAlbum) -> Result<i64>
             album.catalogue_number,
             album.disc_id,
             album.category,
+            album.total_time,
         )
         .fetch_one(&mut *tx)
         .await?
@@ -454,6 +476,8 @@ pub async fn import_csv(
         let mut condition: Option<String> = None;
         let mut notes: Option<String> = None;
         let mut artist_name: Option<String> = None;
+        let mut total_time: Option<String> = None;
+        let mut archive_number: Option<String> = None;
 
         for (idx, field) in record.iter().enumerate() {
             let val = field.trim();
@@ -470,6 +494,8 @@ pub async fn import_csv(
                 Some("condition") => condition = Some(val.to_owned()),
                 Some("notes") => notes = Some(val.to_owned()),
                 Some("artist") => artist_name = Some(val.to_owned()),
+                Some("total_time") => total_time = Some(val.to_owned()),
+                Some("archive_number") => archive_number = Some(val.to_owned()),
                 _ => {}
             }
         }
@@ -482,8 +508,8 @@ pub async fn import_csv(
         let result: Result<()> = async {
             let item_id: i64 = sqlx::query_scalar!(
                 r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
-                                   condition, notes)
-                 VALUES(?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
+                                   condition, notes, total_time, archive_number)
+                 VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
                 title,
                 format,
                 year,
@@ -492,6 +518,8 @@ pub async fn import_csv(
                 catalogue_number,
                 condition,
                 notes,
+                total_time,
+                archive_number,
             )
             .fetch_one(&state.db)
             .await?;

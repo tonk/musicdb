@@ -41,6 +41,8 @@
     "confirmDeleteBody": "Deze actie kan niet ongedaan worden gemaakt (maar je kunt het direct herstellen).",
     "deleted": "Item verwijderd",
     "undo": "Ongedaan maken",
+    "totalTime": "Totale tijd",
+    "archiveNumber": "Archiefnummer",
     "discId": "Schijf-ID",
     "lookupMusicBrainz": "Opzoeken op MusicBrainz"
   },
@@ -70,7 +72,7 @@
   },
   "statistics": {
     "title": "Statistieken",
-    "totalItems": "Totaal Items",
+    "totalItems": "Totaal Items", "totalTracks": "Totaal nummers",
     "byFormat": "Per Formaat",
     "byGenre": "Per Genre",
     "byYear": "Per Jaar"

@@ -39,6 +39,10 @@ function barWidth(count: number, max: number): string {
           <div style="font-size: 36px; font-weight: 700; color: var(--color-accent);">{{ stats.total_items }}</div>
           <div class="text-muted text-sm">{{ t('statistics.totalItems') }}</div>
         </div>
+        <div class="card" style="padding: 20px; text-align: center;">
+          <div style="font-size: 36px; font-weight: 700; color: var(--color-accent);">{{ stats.total_tracks }}</div>
+          <div class="text-muted text-sm">{{ t('statistics.totalTracks') }}</div>
+        </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">

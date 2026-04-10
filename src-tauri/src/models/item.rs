@@ -17,6 +17,8 @@ pub struct ItemRow {
     pub disc_id: Option<String>,
     pub source_category: Option<String>,
     pub musicbrainz_id: Option<String>,
+    pub total_time: Option<String>,
+    pub archive_number: Option<String>,
     pub date_added: String,
     pub updated_at: String,
 }
@@ -52,6 +54,8 @@ pub struct ItemWithArtists {
     pub disc_id: Option<String>,
     pub source_category: Option<String>,
     pub musicbrainz_id: Option<String>,
+    pub total_time: Option<String>,
+    pub archive_number: Option<String>,
     pub date_added: String,
     pub updated_at: String,
     pub artists: Vec<ArtistWithRole>,
@@ -70,6 +74,8 @@ pub struct CreateItemInput {
     pub condition: Option<String>,
     pub notes: Option<String>,
     pub musicbrainz_id: Option<String>,
+    pub total_time: Option<String>,
+    pub archive_number: Option<String>,
     pub artist_ids: Vec<ArtistRoleInput>,
     pub genre_ids: Vec<i64>,
 }
@@ -91,6 +97,8 @@ pub struct UpdateItemInput {
     pub condition: Option<String>,
     pub notes: Option<String>,
     pub musicbrainz_id: Option<String>,
+    pub total_time: Option<String>,
+    pub archive_number: Option<String>,
     pub artist_ids: Option<Vec<ArtistRoleInput>>,
     pub genre_ids: Option<Vec<i64>>,
 }
@@ -119,6 +127,7 @@ pub struct ItemsPage {
 #[derive(Debug, Serialize)]
 pub struct Statistics {
     pub total_items: i64,
+    pub total_tracks: i64,
     pub by_format: Vec<CountEntry>,
     pub by_genre: Vec<CountEntry>,
     pub by_year: Vec<CountEntry>,

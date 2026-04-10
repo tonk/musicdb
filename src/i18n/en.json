@@ -41,6 +41,8 @@
     "confirmDeleteBody": "This action cannot be undone (but you can undo immediately after).",
     "deleted": "Item deleted",
     "undo": "Undo",
+    "totalTime": "Total Time",
+    "archiveNumber": "Archive Number",
     "discId": "Disc ID",
     "lookupMusicBrainz": "Look Up on MusicBrainz"
   },
@@ -70,7 +72,7 @@
   },
   "statistics": {
     "title": "Statistics",
-    "totalItems": "Total Items",
+    "totalItems": "Total Items", "totalTracks": "Total Tracks",
     "byFormat": "By Format",
     "byGenre": "By Genre",
     "byYear": "By Year"

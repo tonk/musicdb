@@ -146,6 +146,14 @@ function formatDuration(secs: number | null): string {
                 <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">{{ t('item.catalogueNumber') }}</td>
                 <td>{{ item.catalogue_number }}</td>
               </tr>
+              <tr v-if="item.total_time">
+                <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">{{ t('item.totalTime') }}</td>
+                <td>{{ item.total_time }}</td>
+              </tr>
+              <tr v-if="item.archive_number">
+                <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">{{ t('item.archiveNumber') }}</td>
+                <td>{{ item.archive_number }}</td>
+              </tr>
               <tr v-if="item.disc_id">
                 <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">{{ t('item.discId') }}</td>
                 <td>{{ item.disc_id }}</td>

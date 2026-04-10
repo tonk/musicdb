@@ -46,6 +46,8 @@ export interface ItemWithArtists extends ItemSummary {
   disc_id: string | null
   source_category: string | null
   musicbrainz_id: string | null
+  total_time: string | null
+  archive_number: string | null
   updated_at: string
   artists: ArtistWithRole[]
   genres: Genre[]
@@ -81,12 +83,15 @@ export interface CreateItemInput {
   condition?: string | null
   notes?: string | null
   musicbrainz_id?: string | null
+  total_time?: string | null
+  archive_number?: string | null
   artist_ids: { artist_id: number; role: string }[]
   genre_ids: number[]
 }
 
 export interface Statistics {
   total_items: number
+  total_tracks: number
   by_format: CountEntry[]
   by_genre: CountEntry[]
   by_year: CountEntry[]

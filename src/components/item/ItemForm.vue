@@ -28,6 +28,8 @@ const publisher      = ref(props.item?.publisher ?? '')
 const catalogueNum   = ref(props.item?.catalogue_number ?? '')
 const condition      = ref(props.item?.condition ?? '')
 const notes          = ref(props.item?.notes ?? '')
+const totalTime      = ref(props.item?.total_time ?? '')
+const archiveNumber  = ref(props.item?.archive_number ?? '')
 
 const artists = ref<ArtistEntry[]>(
   props.item?.artists.map(a => ({ artist_id: a.id, name: a.name, role: a.role })) ?? []
@@ -74,6 +76,8 @@ async function submit() {
       condition: condition.value || null,
       notes: notes.value.trim() || null,
       musicbrainz_id: props.item?.musicbrainz_id ?? null,
+      total_time: totalTime.value.trim() || null,
+      archive_number: archiveNumber.value.trim() || null,
       artist_ids: artists.value.map(a => ({ artist_id: a.artist_id, role: a.role })),
       genre_ids: genreIds.value,
     }
@@ -103,6 +107,8 @@ watch(() => props.item, (item) => {
   catalogueNum.value = item.catalogue_number ?? ''
   condition.value = item.condition ?? ''
   notes.value = item.notes ?? ''
+  totalTime.value = item.total_time ?? ''
+  archiveNumber.value = item.archive_number ?? ''
   artists.value = item.artists.map(a => ({ artist_id: a.id, name: a.name, role: a.role }))
   genreIds.value = item.genres.map(g => g.id)
 })
@@ -110,7 +116,7 @@ watch(() => props.item, (item) => {
 
 <template>
   <form @submit.prevent="submit" style="max-width: 640px;">
-    <div v-if="error" style="padding: 10px 14px; background: var(--color-danger); color: #fff;
+    <div v-if="error" style="padding: 10px 14px; background: var(--color-danger); color: var(--color-accent-text);
                               border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
       {{ error }}
     </div>
@@ -161,6 +167,18 @@ watch(() => props.item, (item) => {
           <option value="">—</option>
           <option v-for="c in CONDITIONS" :key="c" :value="c">{{ c }}</option>
         </select>
+      </div>
+
+      <!-- Total time -->
+      <div class="form-group">
+        <label class="form-label">{{ t('item.totalTime') }}</label>
+        <input v-model="totalTime" class="form-control" placeholder="e.g. 45:30" />
+      </div>
+
+      <!-- Archive number -->
+      <div class="form-group">
+        <label class="form-label">{{ t('item.archiveNumber') }}</label>
+        <input v-model="archiveNumber" class="form-control" />
       </div>
 
       <!-- Notes -->

@@ -82,7 +82,8 @@ const csvResult     = ref<ImportSummary | null>(null)
 const csvError      = ref<string | null>(null)
 
 const TARGET_FIELDS = ['title', 'artist', 'format', 'year', 'label', 'publisher',
-                       'catalogue_number', 'condition', 'genre', 'notes']
+                       'catalogue_number', 'condition', 'genre', 'notes',
+                       'total_time', 'archive_number']
 
 async function pickCsv() {
   const file = await open({ filters: [{ name: 'CSV', extensions: ['csv'] }], multiple: false })

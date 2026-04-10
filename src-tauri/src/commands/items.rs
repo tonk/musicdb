@@ -21,6 +21,7 @@ async fn fetch_item_with_artists(id: i64, db: &sqlx::SqlitePool) -> Result<ItemW
         r#"SELECT id as "id!", title as "title!", format as "format!", year,
                   label, publisher, catalogue_number, condition, notes,
                   cover_art_path, disc_id, source_category, musicbrainz_id,
+                  total_time, archive_number,
                   date_added as "date_added!", updated_at as "updated_at!"
            FROM items WHERE id = ?"#,
         id
@@ -47,6 +48,8 @@ async fn fetch_item_with_artists(id: i64, db: &sqlx::SqlitePool) -> Result<ItemW
         disc_id: row.disc_id,
         source_category: row.source_category,
         musicbrainz_id: row.musicbrainz_id,
+        total_time: row.total_time,
+        archive_number: row.archive_number,
         date_added: row.date_added,
         updated_at: row.updated_at,
         artists,
@@ -226,8 +229,8 @@ pub async fn create_item(
 ) -> Result<ItemWithArtists> {
     let id: i64 = sqlx::query_scalar!(
         r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
-                           condition, notes, musicbrainz_id)
-         VALUES(?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
+                           condition, notes, musicbrainz_id, total_time, archive_number)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
         input.title,
         input.format,
         input.year,
@@ -237,6 +240,8 @@ pub async fn create_item(
         input.condition,
         input.notes,
         input.musicbrainz_id,
+        input.total_time,
+        input.archive_number,
     )
     .fetch_one(&state.db)
     .await?;
@@ -257,6 +262,7 @@ pub async fn update_item(
         r#"SELECT id as "id!", title as "title!", format as "format!", year,
                   label, publisher, catalogue_number, condition, notes,
                   cover_art_path, disc_id, source_category, musicbrainz_id,
+                  total_time, archive_number,
                   date_added as "date_added!", updated_at as "updated_at!"
            FROM items WHERE id = ?"#,
         id
@@ -274,10 +280,13 @@ pub async fn update_item(
     let condition = input.condition.or(row.condition);
     let notes = input.notes.or(row.notes);
     let musicbrainz_id = input.musicbrainz_id.or(row.musicbrainz_id);
+    let total_time = input.total_time.or(row.total_time);
+    let archive_number = input.archive_number.or(row.archive_number);
 
     sqlx::query!(
         "UPDATE items SET title=?, format=?, year=?, label=?, publisher=?,
                           catalogue_number=?, condition=?, notes=?, musicbrainz_id=?,
+                          total_time=?, archive_number=?,
                           updated_at=datetime('now')
          WHERE id=?",
         title,
@@ -289,6 +298,8 @@ pub async fn update_item(
         condition,
         notes,
         musicbrainz_id,
+        total_time,
+        archive_number,
         id,
     )
     .execute(&state.db)
@@ -329,8 +340,9 @@ pub async fn undo_delete(state: State<'_, AppState>) -> Result<Option<ItemWithAr
         let id: i64 = sqlx::query_scalar!(
             r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
                                condition, notes, cover_art_path, disc_id, source_category,
-                               musicbrainz_id, date_added, updated_at)
-             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
+                               musicbrainz_id, total_time, archive_number,
+                               date_added, updated_at)
+             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
             item.title,
             item.format,
             item.year,
@@ -343,6 +355,8 @@ pub async fn undo_delete(state: State<'_, AppState>) -> Result<Option<ItemWithAr
             item.disc_id,
             item.source_category,
             item.musicbrainz_id,
+            item.total_time,
+            item.archive_number,
             item.date_added,
             item.updated_at,
         )
@@ -490,6 +504,10 @@ pub async fn get_statistics(state: State<'_, AppState>) -> Result<Statistics> {
         .fetch_one(&state.db)
         .await?;
 
+    let total_tracks: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM tracks")
+        .fetch_one(&state.db)
+        .await?;
+
     let by_format_rows = sqlx::query(
         "SELECT format, COUNT(*) as cnt FROM items GROUP BY format ORDER BY 2 DESC"
     )
@@ -533,5 +551,5 @@ pub async fn get_statistics(state: State<'_, AppState>) -> Result<Statistics> {
         })
         .collect();
 
-    Ok(Statistics { total_items, by_format, by_genre, by_year })
+    Ok(Statistics { total_items, total_tracks, by_format, by_genre, by_year })
 }

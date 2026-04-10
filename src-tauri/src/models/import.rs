@@ -30,6 +30,7 @@ pub struct ImportAlbum {
     pub publisher: String,
     pub year: Option<i64>,
     pub category: String,
+    pub total_time: Option<String>,
     pub tracks: Vec<TxtRecord>,
     /// Deduped sort_name strings for all artists across all tracks
     pub artist_sort_names: Vec<String>,
