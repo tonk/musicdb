@@ -16,6 +16,18 @@ use crate::{
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/// Returns the next unused sequential disc ID (1, 2, 3, …).
+/// Only counts purely-numeric disc IDs so it doesn't collide with
+/// text-based IDs (e.g. "KM1024") from legacy imports.
+pub async fn next_disc_id(db: &sqlx::SqlitePool) -> Result<String> {
+    let max: Option<i64> = sqlx::query_scalar(
+        "SELECT MAX(CAST(disc_id AS INTEGER)) FROM items WHERE disc_id GLOB '[0-9]*'",
+    )
+    .fetch_one(db)
+    .await?;
+    Ok((max.unwrap_or(0) + 1).to_string())
+}
+
 async fn fetch_item_with_artists(id: i64, db: &sqlx::SqlitePool) -> Result<ItemWithArtists> {
     let row = sqlx::query!(
         r#"SELECT id as "id!", title as "title!", format as "format!", year,
@@ -227,10 +239,12 @@ pub async fn create_item(
     input: CreateItemInput,
     state: State<'_, AppState>,
 ) -> Result<ItemWithArtists> {
+    let disc_id = next_disc_id(&state.db).await?;
+
     let id: i64 = sqlx::query_scalar!(
         r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
-                           condition, notes, musicbrainz_id, total_time, archive_number)
-         VALUES(?,?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
+                           condition, notes, musicbrainz_id, total_time, archive_number, disc_id)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id as "id!""#,
         input.title,
         input.format,
         input.year,
@@ -242,6 +256,7 @@ pub async fn create_item(
         input.musicbrainz_id,
         input.total_time,
         input.archive_number,
+        disc_id,
     )
     .fetch_one(&state.db)
     .await?;

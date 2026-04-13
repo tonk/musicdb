@@ -786,14 +786,17 @@ async fn upsert_audio_album(
         None
     };
 
+    let disc_id = crate::commands::items::next_disc_id(db).await?;
+
     let mut tx = db.begin().await?;
 
     let item_id: i64 = sqlx::query_scalar!(
-        r#"INSERT INTO items(title, format, year, total_time)
-           VALUES (?, 'Other', ?, ?) RETURNING id as "id!""#,
+        r#"INSERT INTO items(title, format, year, total_time, disc_id)
+           VALUES (?, 'Other', ?, ?, ?) RETURNING id as "id!""#,
         album.title,
         album.year,
         total_time,
+        disc_id,
     )
     .fetch_one(&mut *tx)
     .await?;
@@ -909,17 +912,23 @@ async fn upsert_audio_album(
 
 #[tauri::command]
 pub async fn import_audio_folder(
-    folder: String,
+    folders: Vec<String>,
     state: State<'_, AppState>,
     window: tauri::Window,
     app: AppHandle,
 ) -> Result<AudioImportSummary> {
-    let folder_path = PathBuf::from(&folder);
+    let folder_paths: Vec<PathBuf> = folders.into_iter().map(PathBuf::from).collect();
 
-    // Phase 1: walk the directory tree and collect audio file paths (blocking I/O)
-    let groups = tokio::task::spawn_blocking(move || scan_audio_folder(&folder_path))
-        .await
-        .map_err(|e| AppError::Parse(e.to_string()))?;
+    // Phase 1: walk every selected directory and collect audio file paths (blocking I/O)
+    let groups = tokio::task::spawn_blocking(move || {
+        let mut all: Vec<(PathBuf, Vec<PathBuf>)> = Vec::new();
+        for root in &folder_paths {
+            all.extend(scan_audio_folder(root));
+        }
+        all
+    })
+    .await
+    .map_err(|e| AppError::Parse(e.to_string()))?;
 
     let total_albums = groups.len();
     let total_files: usize = groups.iter().map(|(_, files)| files.len()).sum();

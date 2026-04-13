@@ -16,8 +16,9 @@ const audioResult   = ref<AudioImportSummary | null>(null)
 const audioError    = ref<string | null>(null)
 
 async function importAudio() {
-  const folder = await open({ directory: true, multiple: false })
-  if (!folder || Array.isArray(folder)) return
+  const selected = await open({ directory: true, multiple: true })
+  if (!selected || (Array.isArray(selected) && selected.length === 0)) return
+  const folders = Array.isArray(selected) ? selected : [selected]
 
   audioLoading.value = true
   audioProgress.value = null
@@ -29,7 +30,7 @@ async function importAudio() {
   })
 
   try {
-    audioResult.value = await invoke<AudioImportSummary>('import_audio_folder', { folder })
+    audioResult.value = await invoke<AudioImportSummary>('import_audio_folder', { folders })
   } catch (e: unknown) {
     audioError.value = String(e)
   } finally {
