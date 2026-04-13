@@ -26,12 +26,13 @@ pub async fn save_cover_art(
     thumb.save_with_format(&filepath, ImageFormat::Jpeg)?;
 
     let abs_path = filepath.to_string_lossy().to_string();
+    let db = state.pool().await;
     sqlx::query!(
         "UPDATE items SET cover_art_path=?, updated_at=datetime('now') WHERE id=?",
         abs_path,
         item_id
     )
-    .execute(&state.db)
+    .execute(&db)
     .await?;
 
     Ok(abs_path)
@@ -59,12 +60,13 @@ pub async fn fetch_caa_cover(
     thumb.save_with_format(&filepath, ImageFormat::Jpeg)?;
 
     let abs_path = filepath.to_string_lossy().to_string();
+    let db = state.pool().await;
     sqlx::query!(
         "UPDATE items SET cover_art_path=?, updated_at=datetime('now') WHERE id=?",
         abs_path,
         item_id
     )
-    .execute(&state.db)
+    .execute(&db)
     .await?;
 
     Ok(abs_path)

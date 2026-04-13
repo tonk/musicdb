@@ -108,6 +108,7 @@
     "error": "Er is een fout opgetreden",
     "noData": "Geen gegevens",
     "close": "Sluiten",
-    "back": "Terug"
+    "back": "Terug",
+    "confirm": "Bevestigen"
   }
 }

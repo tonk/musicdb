@@ -4,6 +4,7 @@ use crate::{error::Result, state::AppState};
 
 #[tauri::command]
 pub async fn export_csv(path: String, state: State<'_, AppState>) -> Result<()> {
+    let db = state.pool().await;
     let rows = sqlx::query!(
         r#"SELECT i.id as "id!", i.title as "title!", i.format as "format!",
                   i.year, i.label, i.publisher, i.catalogue_number, i.condition,
@@ -17,7 +18,7 @@ pub async fn export_csv(path: String, state: State<'_, AppState>) -> Result<()> 
                              WHERE ig.item_id=i.id), '') AS "genre_names!"
            FROM items i ORDER BY i.title COLLATE NOCASE"#
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
 
     let mut wtr = csv::Writer::from_path(&path)?;
@@ -64,6 +65,7 @@ pub async fn export_csv(path: String, state: State<'_, AppState>) -> Result<()> 
 
 #[tauri::command]
 pub async fn export_json(path: String, state: State<'_, AppState>) -> Result<()> {
+    let db = state.pool().await;
     let rows = sqlx::query!(
         r#"SELECT i.id as "id!", i.title as "title!", i.format as "format!",
                   i.year, i.label, i.publisher, i.catalogue_number, i.condition,
@@ -71,7 +73,7 @@ pub async fn export_json(path: String, state: State<'_, AppState>) -> Result<()>
                   i.date_added as "date_added!", i.updated_at as "updated_at!"
            FROM items i ORDER BY i.title COLLATE NOCASE"#
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
 
     let mut out = Vec::with_capacity(rows.len());
@@ -81,7 +83,7 @@ pub async fn export_json(path: String, state: State<'_, AppState>) -> Result<()>
              WHERE ia.item_id=? ORDER BY ia.sort_order",
             r.id
         )
-        .fetch_all(&state.db)
+        .fetch_all(&db)
         .await?
         .into_iter()
         .map(|a| serde_json::json!({"name": a.name, "role": a.role}))
@@ -91,7 +93,7 @@ pub async fn export_json(path: String, state: State<'_, AppState>) -> Result<()>
             "SELECT g.name FROM item_genres ig JOIN genres g ON g.id=ig.genre_id WHERE ig.item_id=?",
             r.id
         )
-        .fetch_all(&state.db)
+        .fetch_all(&db)
         .await?;
 
         out.push(serde_json::json!({

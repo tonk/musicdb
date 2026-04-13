@@ -231,7 +231,8 @@ pub async fn refresh_fts_artists(item_id: i64, db: &sqlx::SqlitePool) -> Result<
 
 #[tauri::command]
 pub async fn get_item(id: i64, state: State<'_, AppState>) -> Result<ItemWithArtists> {
-    fetch_item_with_artists(id, &state.db).await
+    let db = state.pool().await;
+    fetch_item_with_artists(id, &db).await
 }
 
 #[tauri::command]
@@ -239,7 +240,8 @@ pub async fn create_item(
     input: CreateItemInput,
     state: State<'_, AppState>,
 ) -> Result<ItemWithArtists> {
-    let disc_id = next_disc_id(&state.db).await?;
+    let db = state.pool().await;
+    let disc_id = next_disc_id(&db).await?;
 
     let id: i64 = sqlx::query_scalar!(
         r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
@@ -258,13 +260,13 @@ pub async fn create_item(
         input.archive_number,
         disc_id,
     )
-    .fetch_one(&state.db)
+    .fetch_one(&db)
     .await?;
 
-    sync_item_artists(id, &input.artist_ids, &state.db).await?;
-    sync_item_genres(id, &input.genre_ids, &state.db).await?;
+    sync_item_artists(id, &input.artist_ids, &db).await?;
+    sync_item_genres(id, &input.genre_ids, &db).await?;
 
-    fetch_item_with_artists(id, &state.db).await
+    fetch_item_with_artists(id, &db).await
 }
 
 #[tauri::command]
@@ -273,6 +275,7 @@ pub async fn update_item(
     input: UpdateItemInput,
     state: State<'_, AppState>,
 ) -> Result<ItemWithArtists> {
+    let db = state.pool().await;
     let row = sqlx::query!(
         r#"SELECT id as "id!", title as "title!", format as "format!", year,
                   label, publisher, catalogue_number, condition, notes,
@@ -282,7 +285,7 @@ pub async fn update_item(
            FROM items WHERE id = ?"#,
         id
     )
-    .fetch_optional(&state.db)
+    .fetch_optional(&db)
     .await?
     .ok_or_else(|| AppError::NotFound(format!("Item {id}")))?;
 
@@ -317,28 +320,29 @@ pub async fn update_item(
         archive_number,
         id,
     )
-    .execute(&state.db)
+    .execute(&db)
     .await?;
 
     if let Some(artist_ids) = input.artist_ids {
-        sync_item_artists(id, &artist_ids, &state.db).await?;
+        sync_item_artists(id, &artist_ids, &db).await?;
     }
     if let Some(genre_ids) = input.genre_ids {
-        sync_item_genres(id, &genre_ids, &state.db).await?;
+        sync_item_genres(id, &genre_ids, &db).await?;
     }
 
-    fetch_item_with_artists(id, &state.db).await
+    fetch_item_with_artists(id, &db).await
 }
 
 #[tauri::command]
 pub async fn delete_item(id: i64, state: State<'_, AppState>) -> Result<()> {
-    let item = fetch_item_with_artists(id, &state.db).await?;
+    let db = state.pool().await;
+    let item = fetch_item_with_artists(id, &db).await?;
     {
         let mut buf = state.undo_buffer.lock().unwrap();
         *buf = Some(UndoEntry { item });
     }
     sqlx::query!("DELETE FROM items WHERE id = ?", id)
-        .execute(&state.db)
+        .execute(&db)
         .await?;
     Ok(())
 }
@@ -351,6 +355,7 @@ pub async fn undo_delete(state: State<'_, AppState>) -> Result<Option<ItemWithAr
     };
 
     if let Some(e) = entry {
+        let db = state.pool().await;
         let item = e.item;
         let id: i64 = sqlx::query_scalar!(
             r#"INSERT INTO items(title, format, year, label, publisher, catalogue_number,
@@ -375,7 +380,7 @@ pub async fn undo_delete(state: State<'_, AppState>) -> Result<Option<ItemWithAr
             item.date_added,
             item.updated_at,
         )
-        .fetch_one(&state.db)
+        .fetch_one(&db)
         .await?;
 
         let artist_inputs: Vec<ArtistRoleInput> = item
@@ -386,12 +391,12 @@ pub async fn undo_delete(state: State<'_, AppState>) -> Result<Option<ItemWithAr
                 role: a.role.clone(),
             })
             .collect();
-        sync_item_artists(id, &artist_inputs, &state.db).await?;
+        sync_item_artists(id, &artist_inputs, &db).await?;
 
         let genre_ids: Vec<i64> = item.genres.iter().map(|g| g.id).collect();
-        sync_item_genres(id, &genre_ids, &state.db).await?;
+        sync_item_genres(id, &genre_ids, &db).await?;
 
-        Ok(Some(fetch_item_with_artists(id, &state.db).await?))
+        Ok(Some(fetch_item_with_artists(id, &db).await?))
     } else {
         Ok(None)
     }
@@ -402,6 +407,7 @@ pub async fn list_items(
     params: ListItemsParams,
     state: State<'_, AppState>,
 ) -> Result<ItemsPage> {
+    let db = state.pool().await;
     let page = params.page.unwrap_or(1).max(1);
     let page_size = params.page_size.unwrap_or(50).clamp(1, 500);
     let offset = (page - 1) * page_size;
@@ -450,10 +456,10 @@ pub async fn list_items(
     let count_str = format!("SELECT COUNT(*) FROM items i WHERE {where_clause}");
 
     let total: i64 = sqlx::query_scalar(&count_str)
-        .fetch_one(&state.db)
+        .fetch_one(&db)
         .await?;
 
-    let rows = sqlx::query(&query_str).fetch_all(&state.db).await?;
+    let rows = sqlx::query(&query_str).fetch_all(&db).await?;
 
     use sqlx::Row;
     let items = rows
@@ -479,6 +485,7 @@ pub async fn search_items(
     query: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<ItemSummary>> {
+    let db = state.pool().await;
     let fts_query = format!("{}*", query.replace('"', ""));
     let rows = sqlx::query!(
         r#"SELECT i.id as "id!", i.title as "title!", i.format as "format!",
@@ -494,7 +501,7 @@ pub async fn search_items(
            LIMIT 100"#,
         fts_query
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
 
     Ok(rows
@@ -515,18 +522,19 @@ pub async fn search_items(
 
 #[tauri::command]
 pub async fn get_statistics(state: State<'_, AppState>) -> Result<Statistics> {
+    let db = state.pool().await;
     let total_items: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM items")
-        .fetch_one(&state.db)
+        .fetch_one(&db)
         .await?;
 
     let total_tracks: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM tracks")
-        .fetch_one(&state.db)
+        .fetch_one(&db)
         .await?;
 
     let by_format_rows = sqlx::query(
         "SELECT format, COUNT(*) as cnt FROM items GROUP BY format ORDER BY 2 DESC"
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
     use sqlx::Row;
     let by_format: Vec<CountEntry> = by_format_rows
@@ -542,7 +550,7 @@ pub async fn get_statistics(state: State<'_, AppState>) -> Result<Statistics> {
          FROM genres g JOIN item_genres ig ON ig.genre_id=g.id
          GROUP BY g.id ORDER BY 2 DESC LIMIT 20"
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
     let by_genre: Vec<CountEntry> = by_genre_rows
         .into_iter()
@@ -556,7 +564,7 @@ pub async fn get_statistics(state: State<'_, AppState>) -> Result<Statistics> {
         "SELECT CAST(year AS TEXT) as yr, COUNT(*) as cnt
          FROM items WHERE year IS NOT NULL GROUP BY year ORDER BY year DESC LIMIT 50"
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
     let by_year: Vec<CountEntry> = by_year_rows
         .into_iter()

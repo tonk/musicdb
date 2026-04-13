@@ -1,14 +1,115 @@
 {
-  "nav": { "collection": "Colección", "search": "Búsqueda", "statistics": "Estadísticas", "import": "Importar", "settings": "Configuración" },
-  "collection": { "title": "Mi Colección", "empty": "Aún no hay elementos.", "addItem": "Agregar Elemento", "listView": "Vista de lista", "gridView": "Vista de cuadrícula", "total": "{count} elementos", "filters": "Filtros", "clearFilters": "Borrar Filtros" },
-  "item": { "title": "Título", "artist": "Artista", "format": "Formato", "year": "Año", "label": "Sello", "publisher": "Editorial", "catalogueNumber": "Número de catálogo", "condition": "Estado", "genre": "Género", "notes": "Notas", "coverArt": "Carátula", "dateAdded": "Fecha de adición", "tracks": "Pistas", "trackNumber": "Nº", "duration": "Duración", "version": "Versión", "edit": "Editar", "save": "Guardar", "cancel": "Cancelar", "delete": "Eliminar", "confirmDelete": "¿Eliminar este elemento?", "confirmDeleteBody": "Puede deshacerlo inmediatamente después.", "deleted": "Elemento eliminado", "undo": "Deshacer", "totalTime": "Tiempo total",
+  "nav": {
+    "collection": "Colección",
+    "search": "Búsqueda",
+    "statistics": "Estadísticas",
+    "import": "Importar",
+    "settings": "Configuración"
+  },
+  "collection": {
+    "title": "Mi Colección",
+    "empty": "Aún no hay elementos.",
+    "addItem": "Agregar Elemento",
+    "listView": "Vista de lista",
+    "gridView": "Vista de cuadrícula",
+    "total": "{count} elementos",
+    "filters": "Filtros",
+    "clearFilters": "Borrar Filtros"
+  },
+  "item": {
+    "title": "Título",
+    "artist": "Artista",
+    "format": "Formato",
+    "year": "Año",
+    "label": "Sello",
+    "publisher": "Editorial",
+    "catalogueNumber": "Número de catálogo",
+    "condition": "Estado",
+    "genre": "Género",
+    "notes": "Notas",
+    "coverArt": "Carátula",
+    "dateAdded": "Fecha de adición",
+    "tracks": "Pistas",
+    "trackNumber": "Nº",
+    "duration": "Duración",
+    "version": "Versión",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Eliminar este elemento?",
+    "confirmDeleteBody": "Puede deshacerlo inmediatamente después.",
+    "deleted": "Elemento eliminado",
+    "undo": "Deshacer",
+    "totalTime": "Tiempo total",
     "archiveNumber": "Número de archivo",
-    "discId": "ID del disco", "lookupMusicBrainz": "Buscar en MusicBrainz" },
-  "formats": { "CD": "CD", "LP": "LP (Vinilo)", "EP": "EP", "Single": "Sencillo", "Cassette": "Casete", "Music Book": "Libro de música", "Sheet Music": "Partitura", "Other": "Otro" },
-  "conditions": { "Mint": "Nuevo", "Near Mint": "Casi Nuevo", "VG+": "Muy Bueno+", "VG": "Muy Bueno", "Good": "Bueno", "Fair": "Regular", "Poor": "Malo" },
-  "search": { "placeholder": "Buscar títulos, artistas, sellos...", "noResults": "Sin resultados para \"{query}\"", "results": "{count} resultados" },
-  "statistics": { "title": "Estadísticas", "totalItems": "Total", "totalTracks": "Total pistas", "byFormat": "Por formato", "byGenre": "Por género", "byYear": "Por año" },
-  "import": { "title": "Importar", "txtImport": "Importar TXT (formato heredado)", "csvImport": "Importar CSV", "selectFile": "Seleccionar Archivo", "importing": "Importando...", "done": "Importación completada", "summary": "{imported} de {total} importados ({skipped} omitidos)", "mapColumns": "Asignar columnas", "preview": "Vista previa", "confirm": "Importar" },
-  "settings": { "title": "Configuración", "theme": "Tema", "themeLight": "Claro", "themeDark": "Oscuro", "themeSystem": "Sistema", "language": "Idioma", "defaultView": "Vista predeterminada", "startupView": "Vista de inicio", "database": "Base de datos", "dbPath": "Ruta de la base", "moveDb": "Mover Base de Datos", "version": "Versión" },
-  "common": { "loading": "Cargando...", "error": "Ocurrió un error", "noData": "Sin datos", "close": "Cerrar", "back": "Atrás" }
+    "discId": "ID del disco",
+    "lookupMusicBrainz": "Buscar en MusicBrainz"
+  },
+  "formats": {
+    "CD": "CD",
+    "LP": "LP (Vinilo)",
+    "EP": "EP",
+    "Single": "Sencillo",
+    "Cassette": "Casete",
+    "Music Book": "Libro de música",
+    "Sheet Music": "Partitura",
+    "Other": "Otro"
+  },
+  "conditions": {
+    "Mint": "Nuevo",
+    "Near Mint": "Casi Nuevo",
+    "VG+": "Muy Bueno+",
+    "VG": "Muy Bueno",
+    "Good": "Bueno",
+    "Fair": "Regular",
+    "Poor": "Malo"
+  },
+  "search": {
+    "placeholder": "Buscar títulos, artistas, sellos...",
+    "noResults": "Sin resultados para \"{query}\"",
+    "results": "{count} resultados"
+  },
+  "statistics": {
+    "title": "Estadísticas",
+    "totalItems": "Total",
+    "totalTracks": "Total pistas",
+    "byFormat": "Por formato",
+    "byGenre": "Por género",
+    "byYear": "Por año"
+  },
+  "import": {
+    "title": "Importar",
+    "txtImport": "Importar TXT (formato heredado)",
+    "csvImport": "Importar CSV",
+    "selectFile": "Seleccionar Archivo",
+    "importing": "Importando...",
+    "done": "Importación completada",
+    "summary": "{imported} de {total} importados ({skipped} omitidos)",
+    "mapColumns": "Asignar columnas",
+    "preview": "Vista previa",
+    "confirm": "Importar"
+  },
+  "settings": {
+    "title": "Configuración",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema",
+    "language": "Idioma",
+    "defaultView": "Vista predeterminada",
+    "startupView": "Vista de inicio",
+    "database": "Base de datos",
+    "dbPath": "Ruta de la base",
+    "moveDb": "Mover Base de Datos",
+    "version": "Versión"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "noData": "Sin datos",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "confirm": "Confirmar"
+  }
 }

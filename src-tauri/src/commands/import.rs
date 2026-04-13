@@ -391,6 +391,8 @@ pub async fn import_txt_file(
     let mut imported = 0usize;
     let mut skipped = 0usize;
 
+    let db = state.pool().await;
+
     for (i, album) in albums.iter().enumerate() {
         if i % 10 == 0 {
             let _ = window.emit(
@@ -403,7 +405,7 @@ pub async fn import_txt_file(
             );
         }
 
-        match upsert_album(&state.db, album).await {
+        match upsert_album(&db, album).await {
             Ok(_) => imported += 1,
             Err(e) => {
                 eprintln!("Import skip {}: {e}", album.disc_id);
@@ -470,6 +472,7 @@ pub async fn import_csv(
         })
         .collect();
 
+    let db = state.pool().await;
     let mut total = 0usize;
     let mut imported = 0usize;
     let mut skipped = 0usize;
@@ -532,7 +535,7 @@ pub async fn import_csv(
                 total_time,
                 archive_number,
             )
-            .fetch_one(&state.db)
+            .fetch_one(&db)
             .await?;
 
             if let Some(name) = artist_name {
@@ -544,7 +547,7 @@ pub async fn import_csv(
                     name,
                     sort_name,
                 )
-                .fetch_one(&state.db)
+                .fetch_one(&db)
                 .await?;
                 sqlx::query!(
                     "INSERT OR IGNORE INTO item_artists(item_id, artist_id, role, sort_order)
@@ -552,7 +555,7 @@ pub async fn import_csv(
                     item_id,
                     artist_id,
                 )
-                .execute(&state.db)
+                .execute(&db)
                 .await?;
             }
             Ok(())
@@ -943,6 +946,7 @@ pub async fn import_audio_folder(
     .await
     .map_err(|e| AppError::Parse(e.to_string()))?;
 
+    let db = state.pool().await;
     let mut imported = 0usize;
     let mut skipped = 0usize;
 
@@ -957,7 +961,7 @@ pub async fn import_audio_folder(
             }),
         );
 
-        match upsert_audio_album(&state.db, &app, album).await {
+        match upsert_audio_album(&db, &app, album).await {
             Ok(_) => imported += 1,
             Err(e) => {
                 eprintln!("Audio import skip \"{}\": {e}", album.title);

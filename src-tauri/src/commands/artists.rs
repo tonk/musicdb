@@ -8,12 +8,13 @@ use crate::{
 
 #[tauri::command]
 pub async fn list_artists(state: State<'_, AppState>) -> Result<Vec<Artist>> {
+    let db = state.pool().await;
     let artists = sqlx::query_as!(
         Artist,
         r#"SELECT id as "id!", name as "name!", sort_name as "sort_name!", created_at as "created_at!"
          FROM artists ORDER BY sort_name COLLATE NOCASE"#
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
     Ok(artists)
 }
@@ -23,6 +24,7 @@ pub async fn autocomplete_artists(
     query: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<Artist>> {
+    let db = state.pool().await;
     let pattern = format!("%{}%", query);
     let artists = sqlx::query_as!(
         Artist,
@@ -33,7 +35,7 @@ pub async fn autocomplete_artists(
         pattern,
         pattern
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
     Ok(artists)
 }
@@ -44,6 +46,7 @@ pub async fn create_artist(
     sort_name: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<Artist> {
+    let db = state.pool().await;
     let sname = sort_name.unwrap_or_else(|| name.clone());
     let id: i64 = sqlx::query_scalar!(
         r#"INSERT INTO artists(name, sort_name) VALUES(?,?)
@@ -52,7 +55,7 @@ pub async fn create_artist(
         name,
         sname
     )
-    .fetch_one(&state.db)
+    .fetch_one(&db)
     .await?;
     let artist = sqlx::query_as!(
         Artist,
@@ -60,7 +63,7 @@ pub async fn create_artist(
          FROM artists WHERE id = ?"#,
         id
     )
-    .fetch_one(&state.db)
+    .fetch_one(&db)
     .await?;
     Ok(artist)
 }
@@ -70,6 +73,7 @@ pub async fn get_artist_items(
     artist_id: i64,
     state: State<'_, AppState>,
 ) -> Result<Vec<ItemSummary>> {
+    let db = state.pool().await;
     let rows = sqlx::query!(
         r#"SELECT i.id as "id!", i.title as "title!", i.format as "format!",
                   i.year, i.label, i.catalogue_number, i.cover_art_path,
@@ -83,7 +87,7 @@ pub async fn get_artist_items(
            ORDER BY i.year DESC, i.title COLLATE NOCASE"#,
         artist_id
     )
-    .fetch_all(&state.db)
+    .fetch_all(&db)
     .await?;
 
     Ok(rows

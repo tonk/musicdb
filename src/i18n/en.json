@@ -103,7 +103,13 @@
     "language": "Language",
     "defaultView": "Default View",
     "startupView": "Startup View",
-    "database": "Database",
+    "databases": "Databases",
+    "databasesDesc": "Manage multiple separate databases. Use the sidebar to switch between them.",
+    "databaseName": "New database name…",
+    "addDatabase": "Add",
+    "rename": "Rename",
+    "deleteDatabase": "Delete",
+    "database": "Active Database",
     "dbPath": "Database Path",
     "moveDb": "Move Database",
     "resetDb": "Reset Database",
@@ -116,6 +122,7 @@
     "error": "An error occurred",
     "noData": "No data",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "confirm": "Confirm"
   }
 }

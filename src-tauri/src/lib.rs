@@ -5,14 +5,51 @@ mod models;
 mod state;
 
 use std::sync::Mutex;
+use tokio::sync::RwLock;
 
-use state::AppState;
+use state::{AppState, DatabaseConfig, DatabaseEntry};
 use tauri::Manager;
 
-fn resolve_db_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+fn load_db_config(
+    app: &tauri::AppHandle,
+) -> Result<(DatabaseConfig, String), Box<dyn std::error::Error>> {
     let data_dir = app.path().app_data_dir()?;
     std::fs::create_dir_all(&data_dir)?;
-    Ok(data_dir.join("musicdb.sqlite"))
+
+    let cfg_path = data_dir.join("databases.json");
+
+    let config: DatabaseConfig = if cfg_path.exists() {
+        let content = std::fs::read_to_string(&cfg_path)?;
+        serde_json::from_str(&content)?
+    } else {
+        // First run: create a "Default" entry pointing at the existing musicdb.sqlite
+        let default_path = data_dir
+            .join("musicdb.sqlite")
+            .to_string_lossy()
+            .to_string();
+        DatabaseConfig {
+            current: "Default".to_string(),
+            databases: vec![DatabaseEntry {
+                name: "Default".to_string(),
+                path: default_path,
+            }],
+        }
+    };
+
+    // Resolve the active path (fall back to first entry if current name not found)
+    let current_path = config
+        .databases
+        .iter()
+        .find(|db| db.name == config.current)
+        .or_else(|| config.databases.first())
+        .map(|db| db.path.clone())
+        .ok_or("No databases configured")?;
+
+    // Persist config so it always exists on disk
+    let json = serde_json::to_string_pretty(&config)?;
+    std::fs::write(&cfg_path, json)?;
+
+    Ok((config, current_path))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -24,16 +61,12 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let db_path = resolve_db_path(app.handle())?;
-            let db_path_str = db_path
-                .to_str()
-                .ok_or("invalid DB path")?
-                .to_owned();
-
-            let pool = tauri::async_runtime::block_on(db::init_pool(&db_path_str))?;
+            let (db_config, db_path) = load_db_config(app.handle())?;
+            let pool = tauri::async_runtime::block_on(db::init_pool(&db_path))?;
 
             app.manage(AppState {
-                db: pool,
+                db: RwLock::new(pool),
+                db_config: Mutex::new(db_config),
                 undo_buffer: Mutex::new(None),
             });
 
@@ -68,6 +101,12 @@ pub fn run() {
             commands::settings::get_all_settings,
             commands::settings::move_database,
             commands::settings::reset_database,
+            commands::settings::list_databases,
+            commands::settings::current_database,
+            commands::settings::create_database,
+            commands::settings::switch_database,
+            commands::settings::rename_database,
+            commands::settings::delete_database,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

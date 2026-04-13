@@ -4,9 +4,11 @@ import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settings'
+import { useCollectionStore } from '../stores/collection'
 
 const { t, locale } = useI18n()
 const settings = useSettingsStore()
+const collection = useCollectionStore()
 
 const dbPath        = ref('')
 const moveDbLoading = ref(false)
@@ -27,6 +29,7 @@ async function resetDb() {
   try {
     await invoke('reset_database')
     resetDone.value = true
+    await collection.fetchItems()
   } catch (e: unknown) {
     resetError.value = String(e)
   } finally {
@@ -39,6 +42,7 @@ onMounted(async () => {
     const v = await invoke<string | null>('get_setting', { key: 'db_path' })
     if (v) dbPath.value = v
   } catch { /* ok */ }
+  await loadDatabases()
 })
 
 async function moveDb() {
@@ -63,6 +67,78 @@ async function moveDb() {
 
 // sync locale with settings language
 watch(() => settings.language, lang => { locale.value = lang }, { immediate: true })
+
+// ── Multi-database management ─────────────────────────────────────────────────
+interface DatabaseEntry { name: string; path: string }
+
+const databases      = ref<DatabaseEntry[]>([])
+const currentDb      = ref('')
+const newDbName      = ref('')
+const dbLoading      = ref(false)
+const dbError        = ref<string | null>(null)
+const renamingDb     = ref<string | null>(null)
+const renameValue    = ref('')
+const deleteConfirm  = ref<string | null>(null)
+
+async function loadDatabases() {
+  try {
+    databases.value = await invoke<DatabaseEntry[]>('list_databases')
+    currentDb.value = await invoke<string>('current_database')
+  } catch { /* ignore */ }
+}
+
+async function createDatabase() {
+  const name = newDbName.value.trim()
+  if (!name) return
+  dbLoading.value = true
+  dbError.value   = null
+  try {
+    databases.value = await invoke<DatabaseEntry[]>('create_database', { name })
+    newDbName.value = ''
+  } catch (e: unknown) {
+    dbError.value = String(e)
+  } finally {
+    dbLoading.value = false
+  }
+}
+
+function startRename(name: string) {
+  renamingDb.value  = name
+  renameValue.value = name
+}
+
+async function confirmRename() {
+  const oldName = renamingDb.value
+  const newName = renameValue.value.trim()
+  if (!oldName || !newName || oldName === newName) {
+    renamingDb.value = null
+    return
+  }
+  dbLoading.value  = true
+  dbError.value    = null
+  try {
+    databases.value = await invoke<DatabaseEntry[]>('rename_database', { oldName, newName })
+    if (currentDb.value === oldName) currentDb.value = newName
+    renamingDb.value = null
+  } catch (e: unknown) {
+    dbError.value = String(e)
+  } finally {
+    dbLoading.value = false
+  }
+}
+
+async function deleteDatabase(name: string) {
+  dbLoading.value = true
+  dbError.value   = null
+  deleteConfirm.value = null
+  try {
+    databases.value = await invoke<DatabaseEntry[]>('delete_database', { name })
+  } catch (e: unknown) {
+    dbError.value = String(e)
+  } finally {
+    dbLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -109,6 +185,89 @@ watch(() => settings.language, lang => { locale.value = lang }, { immediate: tru
           <option value="statistics">{{ t('nav.statistics') }}</option>
         </select>
       </div>
+    </div>
+
+    <!-- Databases section -->
+    <div class="card" style="padding: 20px; margin-top: 16px;">
+      <h3 style="margin: 0 0 12px; font-size: 14px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+        {{ t('settings.databases') }}
+      </h3>
+      <p class="text-sm text-muted" style="margin: 0 0 12px;">
+        {{ t('settings.databasesDesc') }}
+      </p>
+
+      <!-- Database list -->
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+        <div
+          v-for="db in databases"
+          :key="db.name"
+          style="display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+                 border: 1px solid var(--color-border); border-radius: var(--radius-md);
+                 background: var(--color-bg-secondary);"
+          :style="db.name === currentDb ? 'border-color: var(--color-accent);' : ''"
+        >
+          <!-- Rename input or name -->
+          <template v-if="renamingDb === db.name">
+            <input
+              v-model="renameValue"
+              class="form-control"
+              style="flex: 1; font-size: 13px; padding: 2px 6px;"
+              @keydown.enter="confirmRename"
+              @keydown.escape="renamingDb = null"
+            />
+            <button class="btn btn-primary" style="font-size: 12px; padding: 2px 8px;" @click="confirmRename">
+              {{ t('item.save') }}
+            </button>
+            <button class="btn btn-ghost" style="font-size: 12px; padding: 2px 8px;" @click="renamingDb = null">
+              {{ t('item.cancel') }}
+            </button>
+          </template>
+          <template v-else>
+            <span style="flex: 1; font-size: 13px; font-weight: db.name === currentDb ? 600 : 400;">
+              {{ db.name }}
+              <span v-if="db.name === currentDb" style="margin-left: 6px; font-size: 11px; color: var(--color-accent);">●</span>
+            </span>
+            <button class="btn btn-ghost" style="font-size: 11px; padding: 2px 6px;" @click="startRename(db.name)">
+              {{ t('settings.rename') }}
+            </button>
+            <template v-if="deleteConfirm === db.name">
+              <button
+                class="btn btn-danger"
+                style="font-size: 11px; padding: 2px 6px;"
+                :disabled="dbLoading"
+                @click="deleteDatabase(db.name)"
+              >{{ t('common.confirm') }}</button>
+              <button class="btn btn-ghost" style="font-size: 11px; padding: 2px 6px;" @click="deleteConfirm = null">
+                {{ t('item.cancel') }}
+              </button>
+            </template>
+            <button
+              v-else
+              class="btn btn-ghost"
+              style="font-size: 11px; padding: 2px 6px; color: var(--color-danger);"
+              :disabled="db.name === currentDb || databases.length <= 1"
+              @click="deleteConfirm = db.name"
+            >
+              {{ t('settings.deleteDatabase') }}
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Add new database -->
+      <div class="flex gap-2" style="align-items: center;">
+        <input
+          v-model="newDbName"
+          class="form-control"
+          style="flex: 1; font-size: 13px;"
+          :placeholder="t('settings.databaseName')"
+          @keydown.enter="createDatabase"
+        />
+        <button class="btn btn-secondary" :disabled="dbLoading || !newDbName.trim()" @click="createDatabase">
+          {{ dbLoading ? '…' : t('settings.addDatabase') }}
+        </button>
+      </div>
+      <p v-if="dbError" class="text-sm" style="margin-top: 8px; color: var(--color-danger);">{{ dbError }}</p>
     </div>
 
     <!-- Database section -->
