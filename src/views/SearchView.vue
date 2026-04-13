@@ -18,7 +18,12 @@ const searched   = ref(false)
 watch(() => route.query.q, q => {
   queryInput.value = String(q ?? '')
   if (queryInput.value) doSearch()
+  else { results.value = []; searched.value = false }
 }, { immediate: true })
+
+watch(queryInput, val => {
+  if (!val.trim()) { results.value = []; searched.value = false }
+})
 
 async function doSearch() {
   if (!queryInput.value.trim()) return
@@ -33,7 +38,14 @@ async function doSearch() {
 }
 
 function submit() {
-  router.push({ name: 'search', query: { q: queryInput.value.trim() } })
+  const q = queryInput.value.trim()
+  if (!q) {
+    router.push({ name: 'search' })
+    results.value = []
+    searched.value = false
+    return
+  }
+  router.push({ name: 'search', query: { q } })
 }
 </script>
 

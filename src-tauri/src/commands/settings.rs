@@ -250,6 +250,29 @@ pub async fn rename_database(
 }
 
 #[tauri::command]
+pub async fn backup_database(
+    dest_path: String,
+    state: State<'_, AppState>,
+) -> Result<String> {
+    let db = state.pool().await;
+    let rows: Vec<sqlx::sqlite::SqliteRow> = sqlx::query("PRAGMA database_list")
+        .fetch_all(&db)
+        .await?;
+
+    let src = rows
+        .first()
+        .and_then(|row| {
+            use sqlx::Row;
+            row.try_get::<String, _>(2).ok()
+        })
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| AppError::Parse("Could not determine database path".to_string()))?;
+
+    std::fs::copy(&src, &dest_path)?;
+    Ok(dest_path)
+}
+
+#[tauri::command]
 pub async fn delete_database(
     name: String,
     state: State<'_, AppState>,

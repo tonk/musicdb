@@ -107,6 +107,7 @@ pub fn run() {
             commands::settings::switch_database,
             commands::settings::rename_database,
             commands::settings::delete_database,
+            commands::settings::backup_database,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

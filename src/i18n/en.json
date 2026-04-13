@@ -111,6 +111,8 @@
     "deleteDatabase": "Delete",
     "database": "Active Database",
     "dbPath": "Database Path",
+    "backupDb": "Backup Database",
+    "backupDbDone": "Backup saved to:",
     "moveDb": "Move Database",
     "resetDb": "Reset Database",
     "resetDbConfirm": "This will permanently delete all items, artists, genres, tracks and cover art. This cannot be undone. Are you sure?",

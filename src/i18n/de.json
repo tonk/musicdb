@@ -101,6 +101,8 @@
     "startupView": "Startansicht",
     "database": "Datenbank",
     "dbPath": "Datenbankpfad",
+    "backupDb": "Datenbank Sichern",
+    "backupDbDone": "Sicherung gespeichert unter:",
     "moveDb": "Datenbank Verschieben",
     "version": "Version"
   },

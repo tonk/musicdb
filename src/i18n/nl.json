@@ -100,6 +100,8 @@
     "startupView": "Startweergave",
     "database": "Database",
     "dbPath": "Databasepad",
+    "backupDb": "Database Back-up Maken",
+    "backupDbDone": "Back-up opgeslagen naar:",
     "moveDb": "Database Verplaatsen",
     "version": "Versie"
   },

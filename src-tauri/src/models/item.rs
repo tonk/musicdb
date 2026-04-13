@@ -2,27 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{artist::ArtistWithRole, genre::Genre, track::Track};
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
-pub struct ItemRow {
-    pub id: i64,
-    pub title: String,
-    pub format: String,
-    pub year: Option<i64>,
-    pub label: Option<String>,
-    pub publisher: Option<String>,
-    pub catalogue_number: Option<String>,
-    pub condition: Option<String>,
-    pub notes: Option<String>,
-    pub cover_art_path: Option<String>,
-    pub disc_id: Option<String>,
-    pub source_category: Option<String>,
-    pub musicbrainz_id: Option<String>,
-    pub total_time: Option<String>,
-    pub archive_number: Option<String>,
-    pub date_added: String,
-    pub updated_at: String,
-}
-
 /// Lightweight summary for list/grid views
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemSummary {

@@ -101,6 +101,8 @@
     "startupView": "Vue au démarrage",
     "database": "Base de données",
     "dbPath": "Chemin de la base",
+    "backupDb": "Sauvegarder la base",
+    "backupDbDone": "Sauvegarde enregistrée dans :",
     "moveDb": "Déplacer la base",
     "version": "Version"
   },

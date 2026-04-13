@@ -101,6 +101,8 @@
     "startupView": "Vista de inicio",
     "database": "Base de datos",
     "dbPath": "Ruta de la base",
+    "backupDb": "Hacer Copia de Seguridad",
+    "backupDbDone": "Copia guardada en:",
     "moveDb": "Mover Base de Datos",
     "version": "Versión"
   },

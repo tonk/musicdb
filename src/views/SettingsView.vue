@@ -16,6 +16,10 @@ const moveDbError   = ref<string | null>(null)
 const moveDbDone    = ref(false)
 const version       = ref(__APP_VERSION__)
 
+const backupLoading = ref(false)
+const backupError   = ref<string | null>(null)
+const backupDone    = ref<string | null>(null)
+
 const resetConfirm  = ref(false)
 const resetLoading  = ref(false)
 const resetDone     = ref(false)
@@ -62,6 +66,31 @@ async function moveDb() {
     moveDbError.value = String(e)
   } finally {
     moveDbLoading.value = false
+  }
+}
+
+async function backupDb() {
+  const now = new Date()
+  const pad = (n: number, len = 2) => String(n).padStart(len, '0')
+  const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+  const defaultName = `musicdb_backup_${ts}.sqlite`
+
+  const path = await save({
+    filters: [{ name: 'SQLite', extensions: ['sqlite', 'db'] }],
+    defaultPath: defaultName,
+  })
+  if (!path) return
+
+  backupLoading.value = true
+  backupError.value   = null
+  backupDone.value    = null
+  try {
+    const result = await invoke<string>('backup_database', { destPath: path })
+    backupDone.value = result
+  } catch (e: unknown) {
+    backupError.value = String(e)
+  } finally {
+    backupLoading.value = false
   }
 }
 
@@ -276,6 +305,17 @@ async function deleteDatabase(name: string) {
         {{ t('settings.database') }}
       </h3>
       <p v-if="dbPath" class="text-faint text-sm" style="margin: 0 0 12px; word-break: break-all;">{{ dbPath }}</p>
+
+      <!-- Backup -->
+      <button class="btn btn-secondary" :disabled="backupLoading" @click="backupDb">
+        {{ backupLoading ? '…' : t('settings.backupDb') }}
+      </button>
+      <p v-if="backupDone"  class="text-sm" style="margin-top: 8px; color: var(--color-success);">{{ t('settings.backupDbDone') }} {{ backupDone }}</p>
+      <p v-if="backupError" class="text-sm" style="margin-top: 8px; color: var(--color-danger);">{{ backupError }}</p>
+
+      <hr style="border: none; border-top: 1px solid var(--color-border); margin: 12px 0;" />
+
+      <!-- Move -->
       <button class="btn btn-secondary" :disabled="moveDbLoading" @click="moveDb">
         {{ moveDbLoading ? '…' : t('settings.moveDb') }}
       </button>

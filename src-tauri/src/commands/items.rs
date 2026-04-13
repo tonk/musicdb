@@ -486,36 +486,63 @@ pub async fn search_items(
     state: State<'_, AppState>,
 ) -> Result<Vec<ItemSummary>> {
     let db = state.pool().await;
-    let fts_query = format!("{}*", query.replace('"', ""));
-    let rows = sqlx::query!(
-        r#"SELECT i.id as "id!", i.title as "title!", i.format as "format!",
-                  i.year, i.label, i.catalogue_number, i.cover_art_path,
-                  i.date_added as "date_added!",
-                  COALESCE((SELECT GROUP_CONCAT(a.name, ', ')
-                             FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
-                             WHERE ia.item_id=i.id ORDER BY ia.sort_order), '') AS "artist_names!: String"
-           FROM items_fts f
-           JOIN items i ON i.id = f.rowid
-           WHERE items_fts MATCH ?
-           ORDER BY rank
-           LIMIT 100"#,
-        fts_query
-    )
-    .fetch_all(&db)
-    .await?;
 
+    // If the query contains a wildcard, use LIKE across key fields.
+    // Otherwise fall back to FTS5 with automatic prefix matching.
+    let rows = if query.contains('*') {
+        let like_pat = query.replace('*', "%");
+        sqlx::query(
+            r#"SELECT i.id, i.title, i.format, i.year, i.label, i.catalogue_number,
+                      i.cover_art_path, i.date_added,
+                      COALESCE((SELECT GROUP_CONCAT(a.name, ', ')
+                                 FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
+                                 WHERE ia.item_id=i.id ORDER BY ia.sort_order), '') AS artist_names
+               FROM items i
+               WHERE i.title LIKE ?1 ESCAPE '\'
+                  OR i.label LIKE ?1 ESCAPE '\'
+                  OR i.catalogue_number LIKE ?1 ESCAPE '\'
+                  OR EXISTS (
+                      SELECT 1 FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
+                      WHERE ia.item_id=i.id AND a.name LIKE ?1 ESCAPE '\'
+                  )
+               ORDER BY i.title COLLATE NOCASE
+               LIMIT 100"#,
+        )
+        .bind(&like_pat)
+        .fetch_all(&db)
+        .await?
+    } else {
+        let fts_query = format!("{}*", query.replace('"', ""));
+        sqlx::query(
+            r#"SELECT i.id, i.title, i.format, i.year, i.label, i.catalogue_number,
+                      i.cover_art_path, i.date_added,
+                      COALESCE((SELECT GROUP_CONCAT(a.name, ', ')
+                                 FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
+                                 WHERE ia.item_id=i.id ORDER BY ia.sort_order), '') AS artist_names
+               FROM items_fts f
+               JOIN items i ON i.id = f.rowid
+               WHERE items_fts MATCH ?
+               ORDER BY rank
+               LIMIT 100"#,
+        )
+        .bind(&fts_query)
+        .fetch_all(&db)
+        .await?
+    };
+
+    use sqlx::Row;
     Ok(rows
         .into_iter()
         .map(|r| ItemSummary {
-            id: r.id,
-            title: r.title,
-            format: r.format,
-            year: r.year,
-            label: r.label,
-            catalogue_number: r.catalogue_number,
-            cover_art_path: r.cover_art_path,
-            date_added: r.date_added,
-            artist_names: r.artist_names,
+            id: r.get("id"),
+            title: r.get("title"),
+            format: r.get("format"),
+            year: r.get("year"),
+            label: r.get("label"),
+            catalogue_number: r.get("catalogue_number"),
+            cover_art_path: r.get("cover_art_path"),
+            date_added: r.get("date_added"),
+            artist_names: r.get::<Option<String>, _>("artist_names").unwrap_or_default(),
         })
         .collect())
 }
