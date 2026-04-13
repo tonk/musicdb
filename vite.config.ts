@@ -1,16 +1,24 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { execSync } from "child_process";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
-// @ts-expect-error process is a nodejs global
-const pkg = require('./package.json');
+
+function getVersion(): string {
+  try {
+    return execSync("git describe --tags --always", { encoding: "utf8" }).trim();
+  } catch {
+    // @ts-expect-error process is a nodejs global
+    return require("./package.json").version;
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [vue()],
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_VERSION__: JSON.stringify(getVersion()),
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
