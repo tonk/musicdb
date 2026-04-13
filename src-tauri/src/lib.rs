@@ -57,6 +57,7 @@ pub fn run() {
             commands::import::import_txt_file,
             commands::import::preview_csv,
             commands::import::import_csv,
+            commands::import::import_audio_folder,
             commands::export::export_csv,
             commands::export::export_json,
             commands::cover_art::save_cover_art,
@@ -66,6 +67,7 @@ pub fn run() {
             commands::settings::set_setting,
             commands::settings::get_all_settings,
             commands::settings::move_database,
+            commands::settings::reset_database,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

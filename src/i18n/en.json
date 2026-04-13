@@ -44,7 +44,8 @@
     "totalTime": "Total Time",
     "archiveNumber": "Archive Number",
     "discId": "Disc ID",
-    "lookupMusicBrainz": "Look Up on MusicBrainz"
+    "lookupMusicBrainz": "Look Up on MusicBrainz",
+    "columns": "Columns"
   },
   "formats": {
     "CD": "CD",
@@ -81,10 +82,14 @@
     "title": "Import",
     "txtImport": "Import from TXT (legacy format)",
     "csvImport": "Import from CSV",
+    "audioImport": "Import from Audio Files",
+    "audioImportDesc": "Recursively scan a folder for MP3, FLAC, OGG, WAV and other audio files. ID3/Vorbis tags are read automatically and folder cover art is imported.",
     "selectFile": "Select File",
+    "selectFolder": "Select Folder",
     "importing": "Importing...",
     "done": "Import complete",
     "summary": "Imported {imported} of {total} items ({skipped} skipped)",
+    "audioSummary": "Imported {imported} of {total} albums ({totalFiles} files, {skipped} skipped)",
     "mapColumns": "Map CSV Columns",
     "preview": "Preview",
     "confirm": "Import"
@@ -101,6 +106,9 @@
     "database": "Database",
     "dbPath": "Database Path",
     "moveDb": "Move Database",
+    "resetDb": "Reset Database",
+    "resetDbConfirm": "This will permanently delete all items, artists, genres, tracks and cover art. This cannot be undone. Are you sure?",
+    "resetDbDone": "Database reset. All data has been deleted.",
     "version": "Version"
   },
   "common": {

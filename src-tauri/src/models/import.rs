@@ -55,3 +55,11 @@ pub struct CsvPreview {
     pub headers: Vec<String>,
     pub rows: Vec<Vec<String>>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct AudioImportSummary {
+    pub total_files: usize,
+    pub total_albums: usize,
+    pub imported: usize,
+    pub skipped: usize,
+}

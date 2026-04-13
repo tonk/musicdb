@@ -8,6 +8,36 @@ import type { ImportSummary } from '../types'
 
 const { t } = useI18n()
 
+// ── Audio import ─────────────────────────────────────────────────────────────
+interface AudioImportSummary { total_files: number; total_albums: number; imported: number; skipped: number }
+const audioLoading  = ref(false)
+const audioProgress = ref<ProgressEvent | null>(null)
+const audioResult   = ref<AudioImportSummary | null>(null)
+const audioError    = ref<string | null>(null)
+
+async function importAudio() {
+  const folder = await open({ directory: true, multiple: false })
+  if (!folder || Array.isArray(folder)) return
+
+  audioLoading.value = true
+  audioProgress.value = null
+  audioResult.value = null
+  audioError.value = null
+
+  const unlisten = await listen<ProgressEvent>('import-progress', e => {
+    audioProgress.value = e.payload
+  })
+
+  try {
+    audioResult.value = await invoke<AudioImportSummary>('import_audio_folder', { folder })
+  } catch (e: unknown) {
+    audioError.value = String(e)
+  } finally {
+    unlisten()
+    audioLoading.value = false
+  }
+}
+
 // ── TXT import ──────────────────────────────────────────────────────────────
 interface ProgressEvent { done: number; total: number; current: string }
 const txtLoading  = ref(false)
@@ -123,6 +153,34 @@ async function runCsvImport() {
 <template>
   <div style="max-width: 720px; display: flex; flex-direction: column; gap: 24px;">
     <h2 style="margin: 0; font-size: 18px;">{{ t('import.title') }}</h2>
+
+    <!-- Audio Import -->
+    <div class="card" style="padding: 20px;">
+      <h3 style="margin: 0 0 12px; font-size: 15px;">{{ t('import.audioImport') }}</h3>
+      <p class="text-muted text-sm" style="margin: 0 0 12px;">
+        {{ t('import.audioImportDesc') }}
+      </p>
+      <button class="btn btn-primary" :disabled="audioLoading" @click="importAudio">
+        {{ audioLoading ? t('import.importing') : t('import.selectFolder') }}
+      </button>
+
+      <div v-if="audioProgress && audioLoading" style="margin-top: 12px;">
+        <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px;">
+          {{ audioProgress.done }} / {{ audioProgress.total }} — {{ audioProgress.current }}
+        </div>
+        <div style="height: 6px; background: var(--color-bg-tertiary); border-radius: 3px; overflow: hidden;">
+          <div
+            style="height: 100%; background: var(--color-accent); transition: width 0.2s;"
+            :style="{ width: audioProgress.total ? `${Math.round(audioProgress.done / audioProgress.total * 100)}%` : '0%' }"
+          />
+        </div>
+      </div>
+
+      <div v-if="audioResult" style="margin-top: 12px; font-size: 13px; color: var(--color-success);">
+        {{ t('import.done') }} — {{ t('import.audioSummary', { imported: audioResult.imported, total: audioResult.total_albums, totalFiles: audioResult.total_files, skipped: audioResult.skipped }) }}
+      </div>
+      <div v-if="audioError" style="margin-top: 12px; font-size: 13px; color: var(--color-danger);">{{ audioError }}</div>
+    </div>
 
     <!-- TXT Import -->
     <div class="card" style="padding: 20px;">

@@ -25,16 +25,16 @@ pub async fn save_cover_art(
     let filepath = covers_dir.join(&filename);
     thumb.save_with_format(&filepath, ImageFormat::Jpeg)?;
 
-    let relative = format!("covers/{}", filename);
+    let abs_path = filepath.to_string_lossy().to_string();
     sqlx::query!(
         "UPDATE items SET cover_art_path=?, updated_at=datetime('now') WHERE id=?",
-        relative,
+        abs_path,
         item_id
     )
     .execute(&state.db)
     .await?;
 
-    Ok(relative)
+    Ok(abs_path)
 }
 
 #[tauri::command]
@@ -58,16 +58,16 @@ pub async fn fetch_caa_cover(
     let filepath = covers_dir.join(&filename);
     thumb.save_with_format(&filepath, ImageFormat::Jpeg)?;
 
-    let relative = format!("covers/{}", filename);
+    let abs_path = filepath.to_string_lossy().to_string();
     sqlx::query!(
         "UPDATE items SET cover_art_path=?, updated_at=datetime('now') WHERE id=?",
-        relative,
+        abs_path,
         item_id
     )
     .execute(&state.db)
     .await?;
 
-    Ok(relative)
+    Ok(abs_path)
 }
 
 fn resize_cover(img: DynamicImage) -> DynamicImage {

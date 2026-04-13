@@ -14,6 +14,26 @@ const moveDbError   = ref<string | null>(null)
 const moveDbDone    = ref(false)
 const version       = ref(__APP_VERSION__)
 
+const resetConfirm  = ref(false)
+const resetLoading  = ref(false)
+const resetDone     = ref(false)
+const resetError    = ref<string | null>(null)
+
+async function resetDb() {
+  resetLoading.value = true
+  resetDone.value    = false
+  resetError.value   = null
+  resetConfirm.value = false
+  try {
+    await invoke('reset_database')
+    resetDone.value = true
+  } catch (e: unknown) {
+    resetError.value = String(e)
+  } finally {
+    resetLoading.value = false
+  }
+}
+
 onMounted(async () => {
   try {
     const v = await invoke<string | null>('get_setting', { key: 'db_path' })
@@ -102,6 +122,25 @@ watch(() => settings.language, lang => { locale.value = lang }, { immediate: tru
       </button>
       <p v-if="moveDbDone"  class="text-sm" style="margin-top: 8px; color: var(--color-success);">Database copied successfully. Restart the app to use the new location.</p>
       <p v-if="moveDbError" class="text-sm" style="margin-top: 8px; color: var(--color-danger);">{{ moveDbError }}</p>
+
+      <hr style="border: none; border-top: 1px solid var(--color-border); margin: 12px 0;" />
+
+      <template v-if="!resetConfirm">
+        <button class="btn btn-danger" :disabled="resetLoading" @click="resetConfirm = true">
+          {{ t('settings.resetDb') }}
+        </button>
+      </template>
+      <template v-else>
+        <p class="text-sm" style="margin: 0 0 10px; color: var(--color-danger);">{{ t('settings.resetDbConfirm') }}</p>
+        <div class="flex gap-2">
+          <button class="btn btn-danger" :disabled="resetLoading" @click="resetDb">
+            {{ resetLoading ? '…' : t('settings.resetDb') }}
+          </button>
+          <button class="btn btn-secondary" @click="resetConfirm = false">{{ t('item.cancel') }}</button>
+        </div>
+      </template>
+      <p v-if="resetDone"  class="text-sm" style="margin-top: 8px; color: var(--color-success);">{{ t('settings.resetDbDone') }}</p>
+      <p v-if="resetError" class="text-sm" style="margin-top: 8px; color: var(--color-danger);">{{ resetError }}</p>
     </div>
 
     <p class="text-faint text-xs" style="margin-top: 16px;">MusicDB v{{ version }}</p>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { convertFileSrc } from '@tauri-apps/api/core'
 import { useCollectionStore } from '../../stores/collection'
 import { useUiStore } from '../../stores/ui'
 import type { ItemSummary } from '../../types'
@@ -55,7 +56,7 @@ function sortArrow(key: string): string {
                       align-items: center; justify-content: center; font-size: 16px;">
             <img
               v-if="item.cover_art_path"
-              :src="item.cover_art_path"
+              :src="convertFileSrc(item.cover_art_path)"
               alt=""
               style="width: 100%; height: 100%; object-fit: cover;"
             />

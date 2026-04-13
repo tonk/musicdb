@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { invoke } from '@tauri-apps/api/core'
@@ -78,7 +78,39 @@ function formatDuration(secs: number | null): string {
   return `${m}:${s}`
 }
 
+// ── Track column picker ───────────────────────────────────────────────────────
 
+const COLUMN_DEFS = [
+  { id: 'disc',     labelKey: 'item.discId',      default: false },
+  { id: 'number',   labelKey: 'item.trackNumber',  default: true  },
+  { id: 'artist',   labelKey: 'item.artist',       default: true  },
+  { id: 'version',  labelKey: 'item.version',      default: true  },
+  { id: 'duration', labelKey: 'item.duration',     default: true  },
+] as const
+
+type ColId = typeof COLUMN_DEFS[number]['id']
+
+const COL_STORAGE_KEY = 'track-columns-v1'
+
+function loadCols(): Record<ColId, boolean> {
+  try {
+    const raw = localStorage.getItem(COL_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore */ }
+  return Object.fromEntries(COLUMN_DEFS.map(c => [c.id, c.default])) as Record<ColId, boolean>
+}
+
+const visibleCols  = ref<Record<ColId, boolean>>(loadCols())
+const colPickerOpen = ref(false)
+
+function toggleCol(id: ColId) {
+  visibleCols.value[id] = !visibleCols.value[id]
+  localStorage.setItem(COL_STORAGE_KEY, JSON.stringify(visibleCols.value))
+}
+
+function closeColPicker() { colPickerOpen.value = false }
+onMounted(() => document.addEventListener('click', closeColPicker))
+onUnmounted(() => document.removeEventListener('click', closeColPicker))
 </script>
 
 <template>
@@ -175,26 +207,57 @@ function formatDuration(secs: number | null): string {
 
         <!-- Tracks -->
         <div v-if="item.tracks.length" style="margin-top: 24px;">
-          <h3 style="margin: 0 0 8px; font-size: 15px;">{{ t('item.tracks') }} ({{ item.tracks.length }})</h3>
+          <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 15px;">{{ t('item.tracks') }} ({{ item.tracks.length }})</h3>
+            <!-- Column picker -->
+            <div style="position: relative; margin-left: auto;">
+              <button
+                class="btn btn-ghost"
+                style="font-size: 12px; padding: 3px 8px;"
+                @click.stop="colPickerOpen = !colPickerOpen"
+              >{{ t('item.columns') }} ▾</button>
+              <div
+                v-if="colPickerOpen"
+                style="position: absolute; right: 0; top: 100%; margin-top: 4px;
+                       background: var(--color-surface); border: 1px solid var(--color-border);
+                       border-radius: var(--radius-md); padding: 6px 10px; z-index: 20;
+                       min-width: 140px; box-shadow: var(--shadow-md);"
+                @click.stop
+              >
+                <label
+                  v-for="col in COLUMN_DEFS"
+                  :key="col.id"
+                  style="display: flex; align-items: center; gap: 8px; padding: 4px 0;
+                         cursor: pointer; font-size: 13px; user-select: none;"
+                >
+                  <input type="checkbox" :checked="visibleCols[col.id]" @change="toggleCol(col.id)" />
+                  {{ t(col.labelKey) }}
+                </label>
+              </div>
+            </div>
+          </div>
+
           <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 48px;">#</th>
+                <th v-if="visibleCols.disc"   style="width: 48px;">{{ t('item.discId') }}</th>
+                <th v-if="visibleCols.number" style="width: 48px;">{{ t('item.trackNumber') }}</th>
                 <th>{{ t('item.title') }}</th>
-                <th>{{ t('item.artist') }}</th>
-                <th>{{ t('item.version') }}</th>
-                <th style="text-align: right;">{{ t('item.duration') }}</th>
+                <th v-if="visibleCols.artist">{{ t('item.artist') }}</th>
+                <th v-if="visibleCols.version">{{ t('item.version') }}</th>
+                <th v-if="visibleCols.duration" style="text-align: right;">{{ t('item.duration') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="track in item.tracks" :key="track.id">
-                <td class="text-faint text-sm">{{ track.track_number }}</td>
+                <td v-if="visibleCols.disc"   class="text-faint text-sm">{{ track.disc_id }}</td>
+                <td v-if="visibleCols.number" class="text-faint text-sm">{{ track.track_number }}</td>
                 <td>{{ track.title }}</td>
-                <td class="text-muted text-sm">
+                <td v-if="visibleCols.artist" class="text-muted text-sm">
                   {{ track.artists.filter(a => a.role === 'artist').map(a => a.name).join(', ') }}
                 </td>
-                <td class="text-faint text-sm">{{ track.version }}</td>
-                <td style="text-align: right;" class="text-faint text-sm">
+                <td v-if="visibleCols.version"  class="text-faint text-sm">{{ track.version }}</td>
+                <td v-if="visibleCols.duration" class="text-faint text-sm" style="text-align: right;">
                   {{ formatDuration(track.duration_secs) }}
                 </td>
               </tr>

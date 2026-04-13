@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, Manager, State};
 
 use crate::{error::Result, state::AppState};
 
@@ -50,6 +50,31 @@ pub async fn get_all_settings(state: State<'_, AppState>) -> Result<Vec<SettingE
             value: r.value,
         })
         .collect())
+}
+
+#[tauri::command]
+pub async fn reset_database(state: State<'_, AppState>, app: AppHandle) -> Result<()> {
+    // Wipe all music data inside a transaction.
+    // FK cascades handle tracks, item_artists, item_genres, track_artists.
+    // The items_ad trigger removes rows from items_fts on DELETE.
+    let mut tx = state.db.begin().await?;
+    sqlx::query!("DELETE FROM items").execute(&mut *tx).await?;
+    sqlx::query!("DELETE FROM artists").execute(&mut *tx).await?;
+    sqlx::query!("DELETE FROM genres").execute(&mut *tx).await?;
+    tx.commit().await?;
+
+    // Clear the in-memory undo buffer
+    *state.undo_buffer.lock().unwrap() = None;
+
+    // Remove all saved cover images
+    if let Ok(data_dir) = app.path().app_data_dir() {
+        let covers_dir = data_dir.join("covers");
+        if covers_dir.exists() {
+            let _ = tokio::fs::remove_dir_all(&covers_dir).await;
+        }
+    }
+
+    Ok(())
 }
 
 #[tauri::command]

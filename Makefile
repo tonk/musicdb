@@ -1,4 +1,4 @@
-.PHONY: all dev build install setup clean check
+.PHONY: all dev build deb rpm install setup clean check
 
 # Tauri v2 system dependencies (Fedora/RHEL)
 TAURI_DEPS = webkit2gtk4.1-devel \
@@ -26,7 +26,13 @@ dev: install
 	npm run tauri dev
 
 build: install
-	npm run tauri build
+	npm run tauri build -- --no-bundle
+
+deb: install
+	npm run tauri build -- --bundles deb
+
+rpm: install
+	npm run tauri build -- --bundles rpm
 
 check:
 	npm run build

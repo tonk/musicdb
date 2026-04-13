@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { convertFileSrc } from '@tauri-apps/api/core'
 import { useUiStore } from '../../stores/ui'
 import type { ItemSummary } from '../../types'
 
@@ -23,7 +24,7 @@ const ui     = useUiStore()
                   align-items: center; justify-content: center; font-size: 48px; overflow: hidden;">
         <img
           v-if="item.cover_art_path"
-          :src="item.cover_art_path"
+          :src="convertFileSrc(item.cover_art_path)"
           alt=""
           style="width: 100%; height: 100%; object-fit: cover;"
         />

@@ -1,10 +1,21 @@
 use std::collections::{BTreeMap, HashSet};
+use std::path::{Path, PathBuf};
 
-use tauri::{Emitter, State};
+use image::ImageFormat;
+use lofty::{
+    picture::PictureType,
+    prelude::{AudioFile, TaggedFileExt},
+    probe::Probe,
+    tag::{Accessor, ItemKey},
+};
+use tauri::{AppHandle, Emitter, Manager, State};
+use walkdir::WalkDir;
 
 use crate::{
     error::{AppError, Result},
-    models::import::{CsvColumnMapping, CsvPreview, ImportAlbum, ImportSummary, TxtRecord},
+    models::import::{
+        AudioImportSummary, CsvColumnMapping, CsvPreview, ImportAlbum, ImportSummary, TxtRecord,
+    },
     state::AppState,
 };
 
@@ -559,6 +570,401 @@ pub async fn import_csv(
 
     Ok(ImportSummary {
         total,
+        imported,
+        skipped,
+    })
+}
+
+// ─── Audio Import ─────────────────────────────────────────────────────────────
+
+const AUDIO_EXTENSIONS: &[&str] = &[
+    "mp3", "flac", "ogg", "wav", "m4a", "aac", "opus", "wv", "ape", "aiff", "aif", "mpc", "spx",
+    "wma",
+];
+
+fn is_audio_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| AUDIO_EXTENSIONS.contains(&e.to_lowercase().as_str()))
+        .unwrap_or(false)
+}
+
+/// Look for cover/folder image files in the given directory (case-insensitive).
+/// Preference order: cover.jpg › cover.png › folder.jpg › folder.png
+fn find_folder_image(dir: &Path) -> Option<Vec<u8>> {
+    const CANDIDATES: &[&str] = &[
+        "cover.jpg",    "cover.jpeg",    "cover.png",
+        "folder.jpg",   "folder.jpeg",   "folder.png",
+        "front.jpg",    "front.jpeg",    "front.png",
+        "album.jpg",    "album.jpeg",    "album.png",
+        "albumart.jpg", "albumart.jpeg", "albumart.png",
+    ];
+
+    let entries = std::fs::read_dir(dir).ok()?;
+
+    let mut best_path: Option<PathBuf> = None;
+    let mut best_rank = usize::MAX;
+
+    for entry in entries.flatten() {
+        let file_name = entry.file_name();
+        let lower = file_name.to_string_lossy().to_lowercase();
+        if let Some(rank) = CANDIDATES.iter().position(|&c| c == lower) {
+            if rank < best_rank {
+                best_rank = rank;
+                best_path = Some(entry.path());
+            }
+        }
+    }
+
+    best_path.and_then(|p| std::fs::read(&p).ok())
+}
+
+struct AudioTrackInfo {
+    title: String,
+    track_number: String,
+    disc_id: String,
+    duration_secs: Option<i64>,
+    artist: Option<String>,
+}
+
+struct ParsedAudioAlbum {
+    title: String,
+    artist: Option<String>,
+    year: Option<i64>,
+    genre: Option<String>,
+    tracks: Vec<AudioTrackInfo>,
+    cover_bytes: Option<Vec<u8>>,
+}
+
+/// Synchronously read tags from all audio files in one directory.
+fn parse_audio_dir(dir: &Path, mut files: Vec<PathBuf>) -> ParsedAudioAlbum {
+    files.sort();
+
+    let mut tracks: Vec<AudioTrackInfo> = Vec::new();
+    let mut album_title: Option<String> = None;
+    let mut album_artist: Option<String> = None;
+    let mut year: Option<i64> = None;
+    let mut genre: Option<String> = None;
+    let mut embedded_cover: Option<Vec<u8>> = None;
+
+    for path in &files {
+        let fallback_title = || {
+            path.file_stem()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string()
+        };
+
+        let Ok(tagged_file) = Probe::open(path).and_then(|p| p.read()) else {
+            tracks.push(AudioTrackInfo {
+                title: fallback_title(),
+                track_number: format!("{:02}", tracks.len() + 1),
+                disc_id: "1".to_string(),
+                duration_secs: None,
+                artist: None,
+            });
+            continue;
+        };
+
+        let duration_secs = Some(tagged_file.properties().duration().as_secs() as i64);
+
+        let Some(tag) = tagged_file.primary_tag().or_else(|| tagged_file.first_tag()) else {
+            tracks.push(AudioTrackInfo {
+                title: fallback_title(),
+                track_number: format!("{:02}", tracks.len() + 1),
+                disc_id: "1".to_string(),
+                duration_secs,
+                artist: None,
+            });
+            continue;
+        };
+
+        // Collect album-level fields from the first file that has them
+        if album_title.is_none() {
+            album_title = tag.album().map(|s| s.to_string());
+        }
+        if album_artist.is_none() {
+            album_artist = tag
+                .get_string(&ItemKey::AlbumArtist)
+                .map(|s| s.to_string())
+                .or_else(|| tag.artist().map(|s| s.to_string()));
+        }
+        if year.is_none() {
+            year = tag.year().map(|y| y as i64);
+        }
+        if genre.is_none() {
+            genre = tag.genre().map(|s| s.to_string());
+        }
+        if embedded_cover.is_none() {
+            embedded_cover = tag
+                .pictures()
+                .iter()
+                .find(|p| {
+                    matches!(p.pic_type(), PictureType::CoverFront | PictureType::Other)
+                })
+                .map(|p| p.data().to_vec());
+        }
+
+        let title = tag
+            .title()
+            .map(|s| s.to_string())
+            .unwrap_or_else(fallback_title);
+        let track_number = tag
+            .track()
+            .map(|n| format!("{:02}", n))
+            .unwrap_or_else(|| format!("{:02}", tracks.len() + 1));
+        let disc_id = tag
+            .disk()
+            .map(|d| d.to_string())
+            .unwrap_or_else(|| "1".to_string());
+        let artist = tag.artist().map(|s| s.to_string());
+
+        tracks.push(AudioTrackInfo {
+            title,
+            track_number,
+            disc_id,
+            duration_secs,
+            artist,
+        });
+    }
+
+    // Sort by disc then track number so order matches tags
+    tracks.sort_by(|a, b| {
+        a.disc_id
+            .cmp(&b.disc_id)
+            .then_with(|| a.track_number.cmp(&b.track_number))
+    });
+
+    let title = album_title.unwrap_or_else(|| {
+        dir.file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string()
+    });
+
+    // Folder image takes priority; fall back to embedded cover art
+    let cover_bytes = find_folder_image(dir).or(embedded_cover);
+
+    ParsedAudioAlbum {
+        title,
+        artist: album_artist,
+        year,
+        genre,
+        tracks,
+        cover_bytes,
+    }
+}
+
+/// Synchronously walk `folder` and group audio files by their parent directory.
+fn scan_audio_folder(folder: &Path) -> Vec<(PathBuf, Vec<PathBuf>)> {
+    let mut dir_groups: BTreeMap<PathBuf, Vec<PathBuf>> = BTreeMap::new();
+    for entry in WalkDir::new(folder).into_iter().filter_map(|e| e.ok()) {
+        if entry.file_type().is_file() && is_audio_file(entry.path()) {
+            let dir = entry.path().parent().unwrap_or(folder).to_path_buf();
+            dir_groups
+                .entry(dir)
+                .or_default()
+                .push(entry.path().to_path_buf());
+        }
+    }
+    dir_groups.into_iter().collect()
+}
+
+async fn upsert_audio_album(
+    db: &sqlx::SqlitePool,
+    app: &AppHandle,
+    album: &ParsedAudioAlbum,
+) -> Result<i64> {
+    if album.tracks.is_empty() {
+        return Err(AppError::Parse("no audio tracks found".to_string()));
+    }
+
+    let total_secs: i64 = album.tracks.iter().filter_map(|t| t.duration_secs).sum();
+    let total_time = if total_secs > 0 {
+        Some(format_duration_secs(total_secs))
+    } else {
+        None
+    };
+
+    let mut tx = db.begin().await?;
+
+    let item_id: i64 = sqlx::query_scalar!(
+        r#"INSERT INTO items(title, format, year, total_time)
+           VALUES (?, 'Other', ?, ?) RETURNING id as "id!""#,
+        album.title,
+        album.year,
+        total_time,
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    // Upsert album artist and link to item
+    if let Some(artist_name) = &album.artist {
+        let artist_id: i64 = sqlx::query_scalar!(
+            r#"INSERT INTO artists(name, sort_name) VALUES(?,?)
+               ON CONFLICT(sort_name) DO UPDATE SET name=excluded.name
+               RETURNING id as "id!""#,
+            artist_name,
+            artist_name,
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        sqlx::query!(
+            "INSERT OR IGNORE INTO item_artists(item_id, artist_id, role, sort_order)
+             VALUES(?,?,'artist',0)",
+            item_id,
+            artist_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    // Upsert genre and link to item
+    if let Some(genre_name) = &album.genre {
+        let genre_id: i64 = sqlx::query_scalar!(
+            r#"INSERT INTO genres(name) VALUES(?)
+               ON CONFLICT(name) DO UPDATE SET name=excluded.name
+               RETURNING id as "id!""#,
+            genre_name,
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        sqlx::query!(
+            "INSERT OR IGNORE INTO item_genres(item_id, genre_id) VALUES(?,?)",
+            item_id,
+            genre_id,
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    // Insert tracks
+    for (ord, track) in album.tracks.iter().enumerate() {
+        let sort_order = ord as i64;
+
+        let track_id: i64 = sqlx::query_scalar!(
+            r#"INSERT INTO tracks(item_id, disc_id, track_number, title, duration_secs, sort_order)
+               VALUES(?,?,?,?,?,?) RETURNING id as "id!""#,
+            item_id,
+            track.disc_id,
+            track.track_number,
+            track.title,
+            track.duration_secs,
+            sort_order,
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        if let Some(artist_name) = &track.artist {
+            let artist_id: i64 = sqlx::query_scalar!(
+                r#"INSERT INTO artists(name, sort_name) VALUES(?,?)
+                   ON CONFLICT(sort_name) DO UPDATE SET name=excluded.name
+                   RETURNING id as "id!""#,
+                artist_name,
+                artist_name,
+            )
+            .fetch_one(&mut *tx)
+            .await?;
+
+            sqlx::query!(
+                "INSERT OR IGNORE INTO track_artists(track_id, artist_id, role)
+                 VALUES(?,?,'artist')",
+                track_id,
+                artist_id,
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+    }
+
+    tx.commit().await?;
+
+    // Save cover art after commit (failures are non-fatal — album is already imported)
+    if let Some(bytes) = &album.cover_bytes {
+        if let Ok(img) = image::load_from_memory(bytes) {
+            if let Ok(data_dir) = app.path().app_data_dir() {
+                let covers_dir = data_dir.join("covers");
+                let _ = tokio::fs::create_dir_all(&covers_dir).await;
+                let filename = format!("{}.jpg", item_id);
+                let filepath = covers_dir.join(&filename);
+                let thumb = img.resize(500, 500, image::imageops::FilterType::Lanczos3);
+                if thumb.save_with_format(&filepath, ImageFormat::Jpeg).is_ok() {
+                    let abs_path = filepath.to_string_lossy().to_string();
+                    let _ = sqlx::query!(
+                        "UPDATE items SET cover_art_path=?, updated_at=datetime('now') WHERE id=?",
+                        abs_path,
+                        item_id,
+                    )
+                    .execute(db)
+                    .await;
+                }
+            }
+        }
+    }
+
+    Ok(item_id)
+}
+
+#[tauri::command]
+pub async fn import_audio_folder(
+    folder: String,
+    state: State<'_, AppState>,
+    window: tauri::Window,
+    app: AppHandle,
+) -> Result<AudioImportSummary> {
+    let folder_path = PathBuf::from(&folder);
+
+    // Phase 1: walk the directory tree and collect audio file paths (blocking I/O)
+    let groups = tokio::task::spawn_blocking(move || scan_audio_folder(&folder_path))
+        .await
+        .map_err(|e| AppError::Parse(e.to_string()))?;
+
+    let total_albums = groups.len();
+    let total_files: usize = groups.iter().map(|(_, files)| files.len()).sum();
+
+    // Phase 2: parse tags for every directory group (blocking CPU + I/O)
+    let albums: Vec<ParsedAudioAlbum> = tokio::task::spawn_blocking(move || {
+        groups
+            .into_iter()
+            .map(|(dir, files)| parse_audio_dir(&dir, files))
+            .collect()
+    })
+    .await
+    .map_err(|e| AppError::Parse(e.to_string()))?;
+
+    let mut imported = 0usize;
+    let mut skipped = 0usize;
+
+    // Phase 3: upsert each parsed album into the database
+    for (i, album) in albums.iter().enumerate() {
+        let _ = window.emit(
+            "import-progress",
+            serde_json::json!({
+                "done": i,
+                "total": total_albums,
+                "current": &album.title,
+            }),
+        );
+
+        match upsert_audio_album(&state.db, &app, album).await {
+            Ok(_) => imported += 1,
+            Err(e) => {
+                eprintln!("Audio import skip \"{}\": {e}", album.title);
+                skipped += 1;
+            }
+        }
+    }
+
+    let _ = window.emit(
+        "import-progress",
+        serde_json::json!({ "done": total_albums, "total": total_albums, "current": "" }),
+    );
+
+    Ok(AudioImportSummary {
+        total_files,
+        total_albums,
         imported,
         skipped,
     })
