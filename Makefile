@@ -11,7 +11,25 @@ dev:
 
 # ─── Production builds ────────────────────────────────────────────────────────
 build:
-	APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build
+	@LINUXDEPLOY="$(LINUXDEPLOY)"; \
+	if [ ! -f "$$LINUXDEPLOY" ]; then \
+	    APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build; \
+	    exit $$?; \
+	fi; \
+	HASH=$$(md5sum "$$LINUXDEPLOY" | awk '{print $$1}'); \
+	STRIP_PATH="/tmp/appimage_extracted_$${HASH}/usr/bin/strip"; \
+	( while true; do \
+	    if [ -f "$$STRIP_PATH" ]; then \
+	        cp /usr/bin/strip "$$STRIP_PATH" 2>/dev/null; \
+	        break; \
+	    fi; \
+	    sleep 0.05; \
+	  done ) & \
+	PATCHER_PID=$$!; \
+	APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build; \
+	STATUS=$$?; \
+	kill $$PATCHER_PID 2>/dev/null; \
+	exit $$STATUS
 
 # AppImage build with automatic strip compatibility fix.
 #

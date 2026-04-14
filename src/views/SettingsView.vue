@@ -73,7 +73,8 @@ async function backupDb() {
   const now = new Date()
   const pad = (n: number, len = 2) => String(n).padStart(len, '0')
   const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-  const defaultName = `musicdb_backup_${ts}.sqlite`
+  const dbName = currentDb.value.replace(/ /g, '_')
+  const defaultName = `musicdb_backup_${dbName}_${ts}.sqlite`
 
   const path = await save({
     filters: [{ name: 'SQLite', extensions: ['sqlite', 'db'] }],
