@@ -14,3 +14,7 @@
 ## Pending
 - [ ] Allow wildcard search — hard part (full regular expression support)
 - [ ] Set version number from current Git tag; show it in the status bar
+- [ ] When importing from an audio file, the "BY FORMAT" is not ""Other"
+      but the audio file format (`mp3`, `flac`, `ogg`, etc)
+- [ ] In "Settings" add an option for the number of displayed items on
+      a single page
