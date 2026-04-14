@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MusicDB
+Comment=Music Collection Manager
+Comment[de]=Musiksammlungsverwaltung
+Comment[es]=Gestor de colección de música
+Comment[fr]=Gestionnaire de collection musicale
+Comment[nl]=Muziekcollectiebeheer
+Exec=/usr/local/bin/musicdb
+Icon=/usr/local/share/icons/hicolor/128x128/apps/musicdb.png
+Categories=AudioVideo;Music;
+Terminal=false
+StartupNotify=true
+StartupWMClass=MusicDB
