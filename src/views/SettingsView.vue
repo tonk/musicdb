@@ -215,6 +215,17 @@ async function deleteDatabase(name: string) {
           <option value="statistics">{{ t('nav.statistics') }}</option>
         </select>
       </div>
+
+      <!-- Page size -->
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">{{ t('settings.pageSize') }}</label>
+        <select v-model.number="settings.pageSize" class="form-control">
+          <option :value="25">25</option>
+          <option :value="50">50</option>
+          <option :value="100">100</option>
+          <option :value="200">200</option>
+        </select>
+      </div>
     </div>
 
     <!-- Databases section -->

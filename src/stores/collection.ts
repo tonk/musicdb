@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import type { ItemSummary, ItemsPage, ItemWithArtists, ListItemsParams } from '../types'
+import { useSettingsStore } from './settings'
 
 export const useCollectionStore = defineStore('collection', () => {
   const items = ref<ItemSummary[]>([])
   const total = ref(0)
   const page = ref(1)
-  const pageSize = ref(50)
+  const settingsStore = useSettingsStore()
+  const pageSize = computed(() => settingsStore.pageSize)
   const sortField = ref('date_added')
   const sortDir = ref<'asc' | 'desc'>('desc')
   const filters = ref<Partial<ListItemsParams>>({})
@@ -74,6 +76,11 @@ export const useCollectionStore = defineStore('collection', () => {
     page.value = 1
     fetchItems()
   }
+
+  watch(pageSize, () => {
+    page.value = 1
+    fetchItems()
+  })
 
   return {
     items, total, page, pageSize, sortField, sortDir,

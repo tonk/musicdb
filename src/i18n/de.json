@@ -104,7 +104,8 @@
     "backupDb": "Datenbank Sichern",
     "backupDbDone": "Sicherung gespeichert unter:",
     "moveDb": "Datenbank Verschieben",
-    "version": "Version"
+    "version": "Version",
+    "pageSize": "Einträge pro Seite"
   },
   "common": {
     "loading": "Laden...",

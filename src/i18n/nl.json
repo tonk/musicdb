@@ -103,7 +103,8 @@
     "backupDb": "Database Back-up Maken",
     "backupDbDone": "Back-up opgeslagen naar:",
     "moveDb": "Database Verplaatsen",
-    "version": "Versie"
+    "version": "Versie",
+    "pageSize": "Items per pagina"
   },
   "common": {
     "loading": "Laden...",

@@ -635,6 +635,7 @@ struct ParsedAudioAlbum {
     artist: Option<String>,
     year: Option<i64>,
     genre: Option<String>,
+    format: String,
     tracks: Vec<AudioTrackInfo>,
     cover_bytes: Option<Vec<u8>>,
 }
@@ -642,6 +643,17 @@ struct ParsedAudioAlbum {
 /// Synchronously read tags from all audio files in one directory.
 fn parse_audio_dir(dir: &Path, mut files: Vec<PathBuf>) -> ParsedAudioAlbum {
     files.sort();
+
+    // Determine format from the most common file extension in this directory
+    let format = {
+        let mut counts: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+        for path in &files {
+            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                *counts.entry(ext.to_uppercase()).or_insert(0) += 1;
+            }
+        }
+        counts.into_iter().max_by_key(|(_, c)| *c).map(|(ext, _)| ext).unwrap_or_else(|| "Other".to_string())
+    };
 
     let mut tracks: Vec<AudioTrackInfo> = Vec::new();
     let mut album_title: Option<String> = None;
@@ -753,6 +765,7 @@ fn parse_audio_dir(dir: &Path, mut files: Vec<PathBuf>) -> ParsedAudioAlbum {
         artist: album_artist,
         year,
         genre,
+        format,
         tracks,
         cover_bytes,
     }
@@ -795,8 +808,9 @@ async fn upsert_audio_album(
 
     let item_id: i64 = sqlx::query_scalar!(
         r#"INSERT INTO items(title, format, year, total_time, disc_id)
-           VALUES (?, 'Other', ?, ?, ?) RETURNING id as "id!""#,
+           VALUES (?, ?, ?, ?, ?) RETURNING id as "id!""#,
         album.title,
+        album.format,
         album.year,
         total_time,
         disc_id,

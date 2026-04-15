@@ -104,7 +104,8 @@
     "backupDb": "Hacer Copia de Seguridad",
     "backupDbDone": "Copia guardada en:",
     "moveDb": "Mover Base de Datos",
-    "version": "Versión"
+    "version": "Versión",
+    "pageSize": "Elementos por página"
   },
   "common": {
     "loading": "Cargando...",

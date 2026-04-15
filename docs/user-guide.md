@@ -58,7 +58,7 @@ Clearing the search box immediately removes the results without needing to resub
 ## Import
 
 ### Audio folder import
-Select one or more folders. MusicDB recursively scans for audio files (MP3, FLAC, OGG, WAV, AIFF, M4A, …), reads the ID3 or Vorbis tags, and groups tracks by album. Cover art embedded in the files or present as `cover.jpg` / `folder.jpg` in the folder is imported automatically.
+Select one or more folders. MusicDB recursively scans for audio files (MP3, FLAC, OGG, WAV, AIFF, M4A, …), reads the ID3 or Vorbis tags, and groups tracks by album. The format field is set automatically from the file extension (e.g. MP3, FLAC). Cover art embedded in the files or present as `cover.jpg` / `folder.jpg` in the folder is imported automatically.
 
 A progress bar shows the current album being processed.
 
@@ -137,6 +137,7 @@ Go to **Settings → Active Database** and click **Backup Database**. A save dia
 | Language | English, Nederlands, Deutsch, Français, Español |
 | Default View | List or Grid for the Collection view |
 | Startup View | Which section opens when the app starts |
+| Items per page | Number of items shown per page in the Collection view (25 / 50 / 100 / 200; default 50) |
 
 ---
 

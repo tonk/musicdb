@@ -104,7 +104,8 @@
     "backupDb": "Sauvegarder la base",
     "backupDbDone": "Sauvegarde enregistrée dans :",
     "moveDb": "Déplacer la base",
-    "version": "Version"
+    "version": "Version",
+    "pageSize": "Éléments par page"
   },
   "common": {
     "loading": "Chargement...",

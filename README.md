@@ -11,13 +11,14 @@ A desktop application for managing a personal music collection. Built with [Taur
 
 - **Collection management** — add, edit, and delete albums, singles, cassettes, vinyl, sheet music, and more
 - **Full-text search** — instant search across titles, artists, labels, catalogue numbers, and notes; supports `*` wildcards
-- **Import** — scan audio folders (MP3, FLAC, OGG, WAV; reads ID3/Vorbis tags), import CSV with column mapping, import legacy TXT (CDN format)
+- **Import** — scan audio folders (MP3, FLAC, OGG, WAV, …; reads ID3/Vorbis tags and detects format automatically), import CSV with column mapping, import legacy TXT (CDN format)
 - **Export** — export your full collection to CSV or JSON
 - **Cover art** — attach local images or fetch automatically from the MusicBrainz Cover Art Archive
 - **MusicBrainz lookup** — search and populate metadata from MusicBrainz
 - **Multiple databases** — maintain separate databases (e.g. vinyl vs. CD) and switch between them instantly
 - **Database backup** — one-click backup with a timestamped filename
 - **Statistics** — breakdown by format, genre, and year
+- **Configurable page size** — choose how many items are shown per page (25 / 50 / 100 / 200)
 - **Themes** — light, dark, and system-follow modes
 - **Localisation** — English, Dutch, German, French, Spanish
 

@@ -117,7 +117,8 @@
     "resetDb": "Reset Database",
     "resetDbConfirm": "This will permanently delete all items, artists, genres, tracks and cover art. This cannot be undone. Are you sure?",
     "resetDbDone": "Database reset. All data has been deleted.",
-    "version": "Version"
+    "version": "Version",
+    "pageSize": "Items per page"
   },
   "common": {
     "loading": "Loading...",
