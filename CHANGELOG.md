@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.6 — 2026-04-17
+
+### Changed
+- Major dependency updates: Vite 8.0, TypeScript 6.0, Vue-i18n 11.3, Vue-router 5.0, and @vitejs/plugin-vue 6.0.
+- Updated Rust dependencies (tokio, uuid, rand, etc.) to their latest compatible versions.
+
 ## v0.1.5 — 2026-04-15
 
 ### Added
