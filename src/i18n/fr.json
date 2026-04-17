@@ -105,7 +105,11 @@
     "backupDbDone": "Sauvegarde enregistrée dans :",
     "moveDb": "Déplacer la base",
     "version": "Version",
-    "pageSize": "Éléments par page"
+    "pageSize": "Éléments par page",
+    "updateAvailable": "Nouvelle version disponible : {version}",
+    "checkingUpdate": "Recherche de mises à jour…",
+    "upToDate": "MusicDB est à jour",
+    "checkUpdate": "Vérifier les mises à jour"
   },
   "common": {
     "loading": "Chargement...",

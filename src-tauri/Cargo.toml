@@ -1,6 +1,6 @@
 [package]
 name = "musicdb"
-version = "0.1.6"
+version = "0.1.7"
 description = "Music Collection Manager"
 authors = ["Ton Kersten", "Claude Code"]
 edition = "2024"

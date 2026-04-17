@@ -7,14 +7,19 @@ import AppFooter from './components/layout/AppFooter.vue'
 import ConfirmDialog from './components/shared/ConfirmDialog.vue'
 import UndoToast from './components/shared/UndoToast.vue'
 import { useSettingsStore } from './stores/settings'
+import { useUpdateStore } from './stores/update'
 import { useTheme } from './composables/useTheme'
 import { useKeyboard } from './composables/useKeyboard'
 
 const settings = useSettingsStore()
+const update = useUpdateStore()
 useTheme()
 useKeyboard()
 
-onMounted(() => settings.load())
+onMounted(() => {
+  settings.load()
+  update.checkUpdate()
+})
 </script>
 
 <template>

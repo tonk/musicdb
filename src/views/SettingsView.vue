@@ -5,16 +5,23 @@ import { save } from '@tauri-apps/plugin-dialog'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settings'
 import { useCollectionStore } from '../stores/collection'
+import { useUpdateStore } from '../stores/update'
+import { openUrl } from '@tauri-apps/plugin-opener'
 
 const { t, locale } = useI18n()
 const settings = useSettingsStore()
 const collection = useCollectionStore()
+const update = useUpdateStore()
 
 const dbPath        = ref('')
 const moveDbLoading = ref(false)
 const moveDbError   = ref<string | null>(null)
 const moveDbDone    = ref(false)
 const version       = ref(__APP_VERSION__)
+
+async function openReleases() {
+  await openUrl('https://github.com/tonk/musicdb/releases/latest')
+}
 
 const backupLoading = ref(false)
 const backupError   = ref<string | null>(null)
@@ -354,6 +361,36 @@ async function deleteDatabase(name: string) {
       <p v-if="resetError" class="text-sm" style="margin-top: 8px; color: var(--color-danger);">{{ resetError }}</p>
     </div>
 
-    <p class="text-faint text-xs" style="margin-top: 16px;">MusicDB v{{ version }}</p>
+    <!-- Version section -->
+    <div class="card" style="padding: 20px; margin-top: 16px;">
+      <h3 style="margin: 0 0 12px; font-size: 14px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+        {{ t('settings.version') }}
+      </h3>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span class="text-sm">MusicDB v{{ version }}</span>
+        <button
+          class="btn btn-secondary"
+          style="font-size: 12px; padding: 4px 10px;"
+          :disabled="update.checking"
+          @click="update.checkUpdate"
+        >
+          {{ update.checking ? '…' : t('settings.checkUpdate') }}
+        </button>
+      </div>
+      <p
+        v-if="update.isUpdateAvailable"
+        class="text-sm"
+        style="margin-top: 12px; color: var(--color-primary); font-weight: 500; cursor: pointer; text-decoration: underline;"
+        @click="openReleases"
+      >
+        {{ t('settings.updateAvailable', { version: update.latestVersion }) }}
+      </p>
+      <p v-else-if="!update.checking && update.latestVersion" class="text-sm text-muted" style="margin-top: 12px;">
+        {{ t('settings.upToDate') }}
+      </p>
+      <p v-if="update.error" class="text-sm" style="margin-top: 12px; color: var(--color-danger);">
+        {{ update.error }}
+      </p>
+    </div>
   </div>
 </template>

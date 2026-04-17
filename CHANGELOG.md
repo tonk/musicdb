@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.7 — 2026-04-17
+
+### Added
+- Auto-update check: The app now checks for new versions on startup and displays a link to the latest GitHub release if one is available.
+- Update management: A new section in Settings allows for manual update checks.
+
 ## v0.1.6 — 2026-04-17
 
 ### Changed

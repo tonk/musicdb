@@ -104,9 +104,13 @@
     "backupDb": "Hacer Copia de Seguridad",
     "backupDbDone": "Copia guardada en:",
     "moveDb": "Mover Base de Datos",
-    "version": "Versión",
-    "pageSize": "Elementos por página"
-  },
+    "version": "Version",
+    "pageSize": "Elementos por página",
+    "updateAvailable": "Nueva versión disponible: {version}",
+    "checkingUpdate": "Buscando actualizaciones…",
+    "upToDate": "MusicDB está actualizado",
+    "checkUpdate": "Buscar actualizaciones"
+    },
   "common": {
     "loading": "Cargando...",
     "error": "Ocurrió un error",

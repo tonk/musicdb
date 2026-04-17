@@ -105,7 +105,11 @@
     "backupDbDone": "Sicherung gespeichert unter:",
     "moveDb": "Datenbank Verschieben",
     "version": "Version",
-    "pageSize": "Einträge pro Seite"
+    "pageSize": "Einträge pro Seite",
+    "updateAvailable": "Neue Version verfügbar: {version}",
+    "checkingUpdate": "Suche nach Updates…",
+    "upToDate": "MusicDB ist aktuell",
+    "checkUpdate": "Auf Updates prüfen"
   },
   "common": {
     "loading": "Laden...",

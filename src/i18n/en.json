@@ -118,7 +118,11 @@
     "resetDbConfirm": "This will permanently delete all items, artists, genres, tracks and cover art. This cannot be undone. Are you sure?",
     "resetDbDone": "Database reset. All data has been deleted.",
     "version": "Version",
-    "pageSize": "Items per page"
+    "pageSize": "Items per page",
+    "updateAvailable": "New version available: {version}",
+    "checkingUpdate": "Checking for updates…",
+    "upToDate": "MusicDB is up to date",
+    "checkUpdate": "Check for Updates"
   },
   "common": {
     "loading": "Loading...",

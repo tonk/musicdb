@@ -104,7 +104,11 @@
     "backupDbDone": "Back-up opgeslagen naar:",
     "moveDb": "Database Verplaatsen",
     "version": "Versie",
-    "pageSize": "Items per pagina"
+    "pageSize": "Items per pagina",
+    "updateAvailable": "Nieuwe versie beschikbaar: {version}",
+    "checkingUpdate": "Controleren op updates…",
+    "upToDate": "MusicDB is up-to-date",
+    "checkUpdate": "Controleren op updates"
   },
   "common": {
     "loading": "Laden...",
