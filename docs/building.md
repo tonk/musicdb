@@ -3,15 +3,40 @@
 ## Prerequisites
 
 ### Rust
-Install via [rustup](https://rustup.rs):
+
+Install via [rustup](https://rustup.rs) on all platforms.
+
+**Linux / macOS:**
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-### Node.js
-Version 20 or later. Install via your package manager or [nvm](https://github.com/nvm-sh/nvm).
+**Windows:** download and run `rustup-init.exe` from [rustup.rs](https://rustup.rs). rustup will prompt you to install the MSVC toolchain automatically.
 
-### Linux system libraries (Ubuntu / Debian)
+### Node.js
+
+Version 20 or later. Install via [nvm](https://github.com/nvm-sh/nvm) (Linux/macOS), [nvm-windows](https://github.com/coreybutler/nvm-windows), or directly from [nodejs.org](https://nodejs.org).
+
+### Platform-specific system libraries
+
+#### Windows
+
+Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and select the **"Desktop development with C++"** workload (alternatively install Visual Studio 2022 with that workload).
+
+WebView2 runtime is pre-installed on Windows 11. On Windows 10 download the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) and run it.
+
+No further system libraries are needed — the MSVC toolchain and WebView2 cover all runtime requirements.
+
+#### macOS
+
+Install the Xcode Command Line Tools (provides `clang`, `make`, and other build essentials):
+```bash
+xcode-select --install
+```
+
+No additional system libraries are needed.
+
+#### Debian / Ubuntu
 ```bash
 sudo apt-get install -y \
   libwebkit2gtk-4.1-dev \
@@ -25,14 +50,12 @@ sudo apt-get install -y \
   squashfs-tools
 ```
 
-### Linux system libraries (Fedora)
+#### Fedora
 ```bash
 sudo dnf install -y \
   webkit2gtk4.1-devel \
   openssl-devel \
-  curl \
-  wget \
-  file \
+  curl wget file \
   libappindicator-gtk3-devel \
   librsvg2-devel \
   patchelf \
@@ -44,8 +67,20 @@ sudo dnf install -y \
 ```bash
 git clone <repo-url> musicdb
 cd musicdb
-npm install
-make dev          # hot-reload development server
+npm ci             # install exact Node.js deps from package-lock.json
+make dev           # hot-reload development server (Linux/macOS)
+```
+
+On **Windows** there is no Makefile; use npm directly:
+```powershell
+npm ci
+npm run tauri dev
+```
+
+If you already ran `npm install` before and hit frontend dependency resolution errors, reset and reinstall:
+```bash
+rm -rf node_modules
+npm ci
 ```
 
 ## Note: AppImage on Fedora / modern distros
@@ -58,7 +93,10 @@ Tauri downloads `linuxdeploy` as an AppImage to assemble the final AppImage bund
 
 ## Building packages
 
+### Linux
+
 ```bash
+rm -rf node_modules && npm ci   # recommended after clone or lockfile updates
 make              # build all configured targets (AppImage, .deb, .rpm)
 make appimage     # AppImage only
 make deb          # .deb only
@@ -69,9 +107,37 @@ Output files land in `src-tauri/target/release/bundle/`.
 
 You can also invoke Tauri directly:
 ```bash
-npm run tauri build                    # all targets from tauri.conf.json
+npm run tauri build                         # all targets from tauri.conf.json
 npm run tauri build -- --bundles appimage   # single target override
 ```
+
+### Common troubleshooting
+
+- `Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esbuild'` or `'rollup'` during `vite build`
+  - Cause: stale or partially-installed frontend dependencies.
+  - Fix:
+    ```bash
+    rm -rf node_modules
+    npm ci
+    ```
+- `beforeBuildCommand npm run build failed` in `tauri build`
+  - This is usually a frontend build issue; run `npm run build` directly first to see the root error, then retry `make appimage`.
+
+### Windows
+
+```powershell
+npm run tauri build
+```
+
+Produces an `.msi` installer and a standalone `.exe` in `src-tauri\target\release\bundle\`.
+
+### macOS
+
+```bash
+npm run tauri build
+```
+
+Produces a `.dmg` disk image and a `.app` bundle in `src-tauri/target/release/bundle/`.
 
 ## Makefile reference
 

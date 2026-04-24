@@ -31,6 +31,8 @@ Download the latest release for your platform from the [Releases](../../releases
 | `MusicDB_x.y.z_amd64.AppImage` | Linux (portable, no install needed) |
 | `musicdb_x.y.z_amd64.deb` | Debian / Ubuntu |
 | `musicdb-x.y.z-1.x86_64.rpm` | Fedora / openSUSE |
+| `MusicDB_x.y.z_x64-setup.exe` | Microsoft Windows |
+| `MusicDB_x.y.z_universal.dmg` | Apple macOS |
 
 **AppImage** — make it executable and run:
 ```bash
@@ -40,7 +42,107 @@ chmod +x MusicDB_*.AppImage
 
 ## Building from source
 
-See [docs/building.md](docs/building.md).
+### Prerequisites
+
+#### Rust
+Install via [rustup](https://rustup.rs) on all platforms.
+
+On **Linux / macOS**:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+On **Windows**: download and run `rustup-init.exe` from [rustup.rs](https://rustup.rs).
+
+#### Node.js
+Version 20 or later. Install via [nvm](https://github.com/nvm-sh/nvm) (Linux/macOS), [nvm-windows](https://github.com/coreybutler/nvm-windows), or directly from [nodejs.org](https://nodejs.org).
+
+#### Platform-specific system dependencies
+
+**Windows**
+
+Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) (select the "Desktop development with C++" workload), or Visual Studio 2022 with that workload included.
+
+WebView2 is pre-installed on Windows 11. On Windows 10 download the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/).
+
+**macOS**
+```bash
+xcode-select --install
+```
+
+**Debian / Ubuntu**
+```bash
+sudo apt-get install -y \
+  libwebkit2gtk-4.1-dev \
+  build-essential \
+  curl wget file \
+  libssl-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev \
+  patchelf \
+  squashfs-tools
+```
+
+**Fedora**
+```bash
+sudo dnf install -y \
+  webkit2gtk4.1-devel \
+  openssl-devel \
+  curl wget file \
+  libappindicator-gtk3-devel \
+  librsvg2-devel \
+  patchelf \
+  squashfs-tools
+```
+
+### Install Node.js package dependencies
+
+```bash
+npm install
+```
+
+If you are setting up from scratch or after pulling dependency changes, prefer a clean install:
+```bash
+rm -rf node_modules
+npm ci
+```
+
+This project uses Vite 8, which expects certain optional peer dependencies (for example `esbuild` and `rollup`) to be present. Using `npm ci` from `package-lock.json` ensures they are installed consistently.
+
+### Development server
+
+```bash
+npm run tauri dev
+# or
+make dev
+```
+
+### Production build
+
+**Linux**
+```bash
+rm -rf node_modules && npm ci   # recommended once after fresh clone / lockfile updates
+make              # AppImage + .deb + .rpm
+make appimage     # AppImage only
+make deb          # Debian package only
+make rpm          # RPM package only
+```
+
+If `npm run build` fails with `ERR_MODULE_NOT_FOUND` (for example missing `esbuild` or `rollup`), reinstall frontend dependencies with:
+```bash
+rm -rf node_modules
+npm ci
+```
+
+**Windows / macOS**
+```bash
+npm run tauri build
+```
+
+Output files are placed in `src-tauri/target/release/bundle/`.
+
+For advanced build options, CI setup, and project structure see [docs/building.md](docs/building.md).
 
 ## Usage
 

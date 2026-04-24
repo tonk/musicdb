@@ -17,7 +17,12 @@
     "fs:allow-mkdir",
     "fs:allow-appdata-read-recursive",
     "fs:allow-appdata-write-recursive",
-    "http:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://api.github.com/repos/tonk/musicdb/releases/*" }
+      ]
+    },
     "http:allow-fetch",
     "window-state:default",
     "window-state:allow-restore-state",

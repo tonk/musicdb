@@ -21,6 +21,24 @@ function prevPage() {
 function nextPage() {
   if (collection.page < totalPages.value) { collection.page++; collection.fetchItems() }
 }
+
+function onGridSortFieldChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  collection.sortField = target.value
+  collection.page = 1
+  collection.fetchItems()
+}
+
+function onGridSortDirChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  collection.sortDir = target.value as 'asc' | 'desc'
+  collection.page = 1
+  collection.fetchItems()
+}
+
+const gridSortField = computed(() => {
+  return collection.sortField === 'artist' || collection.sortField === 'artist_names' ? 'artist' : 'album'
+})
 </script>
 
 <template>
@@ -32,6 +50,31 @@ function nextPage() {
       <div class="flex items-center gap-2" style="margin-bottom: 12px;">
         <span class="text-muted text-sm">{{ collection.total }} {{ t('collection.title') }}</span>
         <div v-if="collection.loading" class="spinner" style="width: 16px; height: 16px; margin-left: 8px;" />
+        <div
+          v-if="settings.defaultView !== 'list'"
+          class="flex items-center gap-2"
+          style="margin-left: auto;"
+        >
+          <label for="grid-sort-field" class="text-muted text-sm">{{ t('collection.sortBy') }}</label>
+          <select
+            id="grid-sort-field"
+            class="input"
+            :value="gridSortField"
+            @change="onGridSortFieldChange"
+          >
+            <option value="artist">{{ t('item.artist') }}</option>
+            <option value="album">{{ t('collection.sortAlbum') }}</option>
+          </select>
+          <select
+            id="grid-sort-dir"
+            class="input"
+            :value="collection.sortDir"
+            @change="onGridSortDirChange"
+          >
+            <option value="asc">{{ t('collection.sortAscending') }}</option>
+            <option value="desc">{{ t('collection.sortDescending') }}</option>
+          </select>
+        </div>
       </div>
 
       <div v-if="!collection.loading && collection.items.length === 0"

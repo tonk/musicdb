@@ -12,6 +12,10 @@
     "addItem": "Ajouter un élément",
     "listView": "Vue liste",
     "gridView": "Vue grille",
+    "sortBy": "Trier par",
+    "sortAlbum": "Album",
+    "sortAscending": "Croissant",
+    "sortDescending": "Décroissant",
     "total": "{count} éléments",
     "filters": "Filtres",
     "clearFilters": "Effacer les filtres"

@@ -6,17 +6,32 @@ use crate::{
     state::AppState,
 };
 
+// SQLite NOCASE is not accent-insensitive, so fold common diacritics for
+// predictable ordering/search behavior (e.g. Á -> A).
+const FOLDED_SORT_NAME_SQL: &str = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(sort_name, 'Á','A'),'á','a'),'À','A'),'à','a'),'Â','A'),'â','a'),'Ä','A'),'ä','a'),'Ã','A'),'ã','a'),'Å','A'),'å','a'),'Æ','AE'),'æ','ae'),'Ç','C'),'ç','c'),'Ð','D'),'ð','d'),'É','E'),'é','e'),'È','E'),'è','e'),'Ê','E'),'ê','e'),'Ë','E'),'ë','e'),'Í','I'),'í','i'),'Ì','I'),'ì','i'),'Î','I'),'î','i'),'Ï','I'),'ï','i'),'Ó','O'),'ó','o'),'Ö','O'),'ö','o'))";
+
 #[tauri::command]
 pub async fn list_artists(state: State<'_, AppState>) -> Result<Vec<Artist>> {
     let db = state.pool().await;
-    let artists = sqlx::query_as!(
-        Artist,
-        r#"SELECT id as "id!", name as "name!", sort_name as "sort_name!", created_at as "created_at!"
-         FROM artists ORDER BY sort_name COLLATE NOCASE"#
-    )
+    let query = format!(
+        r#"SELECT id, name, sort_name, created_at
+           FROM artists
+           ORDER BY {FOLDED_SORT_NAME_SQL}, sort_name COLLATE NOCASE"#
+    );
+    let rows = sqlx::query(&query)
     .fetch_all(&db)
     .await?;
-    Ok(artists)
+
+    use sqlx::Row;
+    Ok(rows
+        .into_iter()
+        .map(|r| Artist {
+            id: r.get("id"),
+            name: r.get("name"),
+            sort_name: r.get("sort_name"),
+            created_at: r.get("created_at"),
+        })
+        .collect())
 }
 
 #[tauri::command]
@@ -26,18 +41,29 @@ pub async fn autocomplete_artists(
 ) -> Result<Vec<Artist>> {
     let db = state.pool().await;
     let pattern = format!("%{}%", query);
-    let artists = sqlx::query_as!(
-        Artist,
-        r#"SELECT id as "id!", name as "name!", sort_name as "sort_name!", created_at as "created_at!"
-         FROM artists
-         WHERE name LIKE ? OR sort_name LIKE ?
-         ORDER BY name COLLATE NOCASE LIMIT 20"#,
-        pattern,
-        pattern
-    )
+    let query = format!(
+        r#"SELECT id, name, sort_name, created_at
+           FROM artists
+           WHERE name LIKE ?1 OR sort_name LIKE ?2
+           ORDER BY {FOLDED_SORT_NAME_SQL}, sort_name COLLATE NOCASE
+           LIMIT 20"#
+    );
+    let rows = sqlx::query(&query)
+    .bind(&pattern)
+    .bind(&pattern)
     .fetch_all(&db)
     .await?;
-    Ok(artists)
+
+    use sqlx::Row;
+    Ok(rows
+        .into_iter()
+        .map(|r| Artist {
+            id: r.get("id"),
+            name: r.get("name"),
+            sort_name: r.get("sort_name"),
+            created_at: r.get("created_at"),
+        })
+        .collect())
 }
 
 #[tauri::command]

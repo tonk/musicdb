@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.8 — 2026-04-24
+
+### Added
+- Grid view sorting controls for Artist/Album with Ascending/Descending options.
+
+### Fixed
+- Build docs now include clean dependency install steps and troubleshooting for missing Vite peer dependencies during Tauri builds.
+- Update check HTTP permission scope now explicitly allows the GitHub releases API endpoint.
+- Artist ordering is now accent-insensitive (for example, `Árstíðir` sorts with `A`) across collection sorting and artist autocomplete/listing.
+
 ## v0.1.7 — 2026-04-17
 
 ### Added

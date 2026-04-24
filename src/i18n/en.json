@@ -12,6 +12,10 @@
     "addItem": "Add Item",
     "listView": "List View",
     "gridView": "Grid View",
+    "sortBy": "Sort by",
+    "sortAlbum": "Album",
+    "sortAscending": "Ascending",
+    "sortDescending": "Descending",
     "total": "{count} items",
     "filters": "Filters",
     "clearFilters": "Clear Filters"

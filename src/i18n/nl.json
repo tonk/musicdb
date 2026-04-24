@@ -12,6 +12,10 @@
     "addItem": "Item Toevoegen",
     "listView": "Lijstweergave",
     "gridView": "Rasterweergave",
+    "sortBy": "Sorteren op",
+    "sortAlbum": "Album",
+    "sortAscending": "Oplopend",
+    "sortDescending": "Aflopend",
     "total": "{count} items",
     "filters": "Filters",
     "clearFilters": "Filters Wissen"

@@ -412,8 +412,12 @@ pub async fn list_items(
     let page_size = params.page_size.unwrap_or(50).clamp(1, 500);
     let offset = (page - 1) * page_size;
 
+    // SQLite's NOCASE is not accent-insensitive. Fold common diacritics so
+    // names like "Árstíðir" sort with "A".
+    let folded_artist_sort_col = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(artist_sort_name, ''), 'Á','A'),'á','a'),'À','A'),'à','a'),'Â','A'),'â','a'),'Ä','A'),'ä','a'),'Ã','A'),'ã','a'),'Å','A'),'å','a'),'Æ','AE'),'æ','ae'),'Ç','C'),'ç','c'),'Ð','D'),'ð','d'),'É','E'),'é','e'),'È','E'),'è','e'),'Ê','E'),'ê','e'),'Ë','E'),'ë','e'),'Í','I'),'í','i'),'Ì','I'),'ì','i'),'Î','I'),'î','i'),'Ï','I'),'ï','i'),'Ó','O'),'ó','o'),'Ö','O'),'ö','o'))";
     let sort_col = match params.sort_field.as_deref() {
-        Some("title") => "i.title COLLATE NOCASE",
+        Some("title") | Some("album") => "i.title COLLATE NOCASE",
+        Some("artist") | Some("artist_names") => folded_artist_sort_col,
         Some("year") => "i.year",
         Some("format") => "i.format",
         Some("label") => "i.label COLLATE NOCASE",
@@ -445,6 +449,11 @@ pub async fn list_items(
     let query_str = format!(
         r#"SELECT i.id, i.title, i.format, i.year, i.label, i.catalogue_number,
                   i.cover_art_path, i.date_added,
+                  COALESCE((SELECT a.sort_name
+                             FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
+                             WHERE ia.item_id=i.id
+                             ORDER BY ia.sort_order
+                             LIMIT 1), '') AS artist_sort_name,
                   COALESCE((SELECT GROUP_CONCAT(a.name, ', ')
                              FROM item_artists ia JOIN artists a ON a.id=ia.artist_id
                              WHERE ia.item_id=i.id ORDER BY ia.sort_order), '') AS artist_names

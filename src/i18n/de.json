@@ -12,6 +12,10 @@
     "addItem": "Eintrag Hinzufügen",
     "listView": "Listenansicht",
     "gridView": "Rasteransicht",
+    "sortBy": "Sortieren nach",
+    "sortAlbum": "Album",
+    "sortAscending": "Aufsteigend",
+    "sortDescending": "Absteigend",
     "total": "{count} Einträge",
     "filters": "Filter",
     "clearFilters": "Filter Löschen"

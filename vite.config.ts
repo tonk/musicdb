@@ -20,6 +20,11 @@ export default defineConfig(async () => ({
   define: {
     __APP_VERSION__: JSON.stringify(getVersion()),
   },
+  build: {
+    // Tauri bundles with a modern runtime; keep syntax modern to avoid
+    // unnecessary/transpilation edge-cases in esbuild.
+    target: "esnext",
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

@@ -12,6 +12,10 @@
     "addItem": "Agregar Elemento",
     "listView": "Vista de lista",
     "gridView": "Vista de cuadrícula",
+    "sortBy": "Ordenar por",
+    "sortAlbum": "Álbum",
+    "sortAscending": "Ascendente",
+    "sortDescending": "Descendente",
     "total": "{count} elementos",
     "filters": "Filtros",
     "clearFilters": "Borrar Filtros"
