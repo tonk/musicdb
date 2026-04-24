@@ -17,6 +17,9 @@ warmdesk-*.tar.gz
 *.out
 vendor/
 
+# ── Node / Modules ───────────────────────────────────────────────────────────
+node_modules/
+
 # ── Node / Frontend ──────────────────────────────────────────────────────────
 frontend/node_modules/
 frontend/.vite/
