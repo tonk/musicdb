@@ -139,7 +139,7 @@ watch(() => props.item, (item) => {
       <!-- Year -->
       <div class="form-group">
         <label class="form-label">{{ t('item.year') }}</label>
-        <input v-model="year" class="form-control" type="number" min="1800" max="2100" placeholder="e.g. 1998" />
+        <input v-model="year" class="form-control" type="number" min="1800" max="2100" :placeholder="t('item.yearPlaceholder')" />
       </div>
 
       <!-- Label -->
@@ -172,7 +172,7 @@ watch(() => props.item, (item) => {
       <!-- Total time -->
       <div class="form-group">
         <label class="form-label">{{ t('item.totalTime') }}</label>
-        <input v-model="totalTime" class="form-control" placeholder="e.g. 45:30" />
+        <input v-model="totalTime" class="form-control" :placeholder="t('item.totalTimePlaceholder')" />
       </div>
 
       <!-- Archive number -->
@@ -209,7 +209,7 @@ watch(() => props.item, (item) => {
           </button>
         </div>
         <div style="display: flex; gap: 8px;">
-          <input v-model="genreInput" class="form-control" placeholder="Add genre…"
+          <input v-model="genreInput" class="form-control" :placeholder="t('item.addGenrePlaceholder')"
                  @keydown.enter.prevent="addGenreByName" style="max-width: 200px;" />
           <button type="button" class="btn btn-ghost" @click="addGenreByName">+</button>
         </div>

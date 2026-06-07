@@ -18,7 +18,9 @@
     "sortDescending": "Aflopend",
     "total": "{count} items",
     "filters": "Filters",
-    "clearFilters": "Filters Wissen"
+    "clearFilters": "Filters Wissen",
+    "yearFrom": "van",
+    "yearTo": "tot"
   },
   "item": {
     "title": "Titel",
@@ -48,7 +50,26 @@
     "totalTime": "Totale tijd",
     "archiveNumber": "Archiefnummer",
     "discId": "Schijf-ID",
-    "lookupMusicBrainz": "Opzoeken op MusicBrainz"
+    "lookupMusicBrainz": "Opzoeken op MusicBrainz",
+    "musicbrainz": "MusicBrainz",
+    "yearPlaceholder": "bijv. 1998",
+    "totalTimePlaceholder": "bijv. 45:30",
+    "addGenrePlaceholder": "Genre toevoegen…"
+  },
+  "artist": {
+    "searchPlaceholder": "Zoek of voeg artiest toe…",
+    "create": "+ \"{name}\" aanmaken",
+    "roles": {
+      "artist": "artiest",
+      "composer": "componist",
+      "arranger": "arrangeur"
+    }
+  },
+  "musicbrainz": {
+    "title": "MusicBrainz Opzoeken",
+    "searching": "MusicBrainz doorzoeken…",
+    "noResults": "Geen resultaten gevonden.",
+    "use": "Gebruiken"
   },
   "formats": {
     "CD": "CD",

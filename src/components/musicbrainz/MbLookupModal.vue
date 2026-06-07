@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { invoke } from '@tauri-apps/api/core'
 import type { MbRelease } from '../../types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   initialTitle: string
@@ -40,15 +43,15 @@ async function search() {
     <div class="modal-overlay" @click.self="emit('close')">
       <div class="modal" style="width: 620px; max-width: 95vw;">
         <div class="flex items-center gap-2" style="margin-bottom: 16px;">
-          <h3 style="margin: 0; font-size: 16px; flex: 1;">MusicBrainz Lookup</h3>
-          <button class="btn btn-ghost" style="padding: 4px 8px;" @click="emit('close')">✕</button>
+          <h3 style="margin: 0; font-size: 16px; flex: 1;">{{ t('musicbrainz.title') }}</h3>
+          <button class="btn btn-ghost" style="padding: 4px 8px;" :aria-label="t('common.close')" @click="emit('close')">✕</button>
         </div>
 
         <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-          <input v-model="title"  class="form-control" placeholder="Title"  style="flex: 2;" />
-          <input v-model="artist" class="form-control" placeholder="Artist" style="flex: 2;" />
+          <input v-model="title"  class="form-control" :placeholder="t('item.title')"  style="flex: 2;" />
+          <input v-model="artist" class="form-control" :placeholder="t('item.artist')" style="flex: 2;" />
           <button class="btn btn-primary" :disabled="loading" @click="search">
-            {{ loading ? '…' : 'Search' }}
+            {{ loading ? '…' : t('nav.search') }}
           </button>
         </div>
 
@@ -56,18 +59,18 @@ async function search() {
 
         <div v-if="loading" class="flex items-center gap-2">
           <div class="spinner" />
-          <span class="text-muted text-sm">Searching MusicBrainz…</span>
+          <span class="text-muted text-sm">{{ t('musicbrainz.searching') }}</span>
         </div>
 
-        <p v-else-if="searched && results.length === 0" class="text-muted text-sm">No results found.</p>
+        <p v-else-if="searched && results.length === 0" class="text-muted text-sm">{{ t('musicbrainz.noResults') }}</p>
 
         <table v-else-if="results.length" class="data-table" style="font-size: 13px;">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Artist</th>
-              <th>Year</th>
-              <th>Label</th>
+              <th>{{ t('item.title') }}</th>
+              <th>{{ t('item.artist') }}</th>
+              <th>{{ t('item.year') }}</th>
+              <th>{{ t('item.label') }}</th>
               <th></th>
             </tr>
           </thead>
@@ -79,7 +82,7 @@ async function search() {
               <td class="truncate text-faint" style="max-width: 120px;">{{ r.label }}</td>
               <td>
                 <button class="btn btn-primary" style="padding: 3px 10px; font-size: 12px;" @click="emit('selected', r)">
-                  Use
+                  {{ t('musicbrainz.use') }}
                 </button>
               </td>
             </tr>

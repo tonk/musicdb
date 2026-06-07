@@ -1,3 +1,8 @@
+export interface DatabaseEntry {
+  name: string
+  path: string
+}
+
 export interface Artist {
   id: number
   name: string

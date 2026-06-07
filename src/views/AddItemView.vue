@@ -15,7 +15,7 @@ function onSaved(item: ItemWithArtists) {
 <template>
   <div>
     <div class="flex items-center gap-2" style="margin-bottom: 16px;">
-      <button class="btn btn-ghost" @click="router.back()">← Back</button>
+      <button class="btn btn-ghost" @click="router.back()">← {{ t('common.back') }}</button>
       <h2 style="margin: 0; font-size: 18px;">{{ t('collection.addItem') }}</h2>
     </div>
     <ItemForm @saved="onSaved" @cancel="router.back()" />

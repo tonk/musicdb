@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { invoke } from '@tauri-apps/api/core'
 import ItemList from '../components/collection/ItemList.vue'
 import type { Artist, ItemSummary } from '../types'
 
 const route  = useRoute()
 const router = useRouter()
+const { t }  = useI18n()
 
 const artist  = ref<Artist | null>(null)
 const items   = ref<ItemSummary[]>([])
@@ -33,10 +35,10 @@ onMounted(async () => {
 <template>
   <div>
     <div class="flex items-center gap-2" style="margin-bottom: 16px;">
-      <button class="btn btn-ghost" @click="router.back()">← Back</button>
+      <button class="btn btn-ghost" @click="router.back()">← {{ t('common.back') }}</button>
     </div>
 
-    <div v-if="loading" class="text-muted">Loading…</div>
+    <div v-if="loading" class="text-muted">{{ t('common.loading') }}</div>
     <div v-else-if="error" style="color: var(--color-danger);">{{ error }}</div>
 
     <template v-else>

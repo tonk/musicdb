@@ -116,7 +116,7 @@ onUnmounted(() => document.removeEventListener('click', closeColPicker))
 <template>
   <div>
     <div class="flex items-center gap-2" style="margin-bottom: 16px;">
-      <button class="btn btn-ghost" @click="router.push({ name: 'collection' })">← Back</button>
+      <button class="btn btn-ghost" @click="router.push({ name: 'collection' })">← {{ t('common.back') }}</button>
       <template v-if="item && !editing">
         <button class="btn btn-secondary" @click="editing = true">{{ t('item.edit') }}</button>
         <button class="btn btn-secondary" @click="showMbModal = true">{{ t('item.lookupMusicBrainz') }}</button>
@@ -191,7 +191,7 @@ onUnmounted(() => document.removeEventListener('click', closeColPicker))
                 <td>{{ item.disc_id }}</td>
               </tr>
               <tr v-if="item.musicbrainz_id">
-                <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">MusicBrainz</td>
+                <td style="padding: 2px 12px 2px 0; color: var(--color-text-muted);">{{ t('item.musicbrainz') }}</td>
                 <td><span class="text-faint text-sm">{{ item.musicbrainz_id }}</span></td>
               </tr>
               <tr>

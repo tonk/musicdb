@@ -4,12 +4,11 @@ import { RouterLink, useRouter } from 'vue-router'
 import { invoke } from '@tauri-apps/api/core'
 import { useI18n } from 'vue-i18n'
 import { useCollectionStore } from '../../stores/collection'
+import type { DatabaseEntry } from '../../types'
 
 const { t } = useI18n()
 const collection = useCollectionStore()
 const router = useRouter()
-
-interface DatabaseEntry { name: string; path: string }
 
 const databases  = ref<DatabaseEntry[]>([])
 const currentDb  = ref('')

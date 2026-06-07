@@ -700,12 +700,12 @@ fn parse_audio_dir(dir: &Path, mut files: Vec<PathBuf>) -> ParsedAudioAlbum {
         }
         if album_artist.is_none() {
             album_artist = tag
-                .get_string(&ItemKey::AlbumArtist)
+                .get_string(ItemKey::AlbumArtist)
                 .map(|s| s.to_string())
                 .or_else(|| tag.artist().map(|s| s.to_string()));
         }
         if year.is_none() {
-            year = tag.year().map(|y| y as i64);
+            year = tag.date().map(|d| d.year as i64);
         }
         if genre.is_none() {
             genre = tag.genre().map(|s| s.to_string());

@@ -18,7 +18,9 @@
     "sortDescending": "Absteigend",
     "total": "{count} Einträge",
     "filters": "Filter",
-    "clearFilters": "Filter Löschen"
+    "clearFilters": "Filter Löschen",
+    "yearFrom": "von",
+    "yearTo": "bis"
   },
   "item": {
     "title": "Titel",
@@ -48,7 +50,26 @@
     "totalTime": "Gesamtzeit",
     "archiveNumber": "Archivnummer",
     "discId": "Disc-ID",
-    "lookupMusicBrainz": "Auf MusicBrainz suchen"
+    "lookupMusicBrainz": "Auf MusicBrainz suchen",
+    "musicbrainz": "MusicBrainz",
+    "yearPlaceholder": "z. B. 1998",
+    "totalTimePlaceholder": "z. B. 45:30",
+    "addGenrePlaceholder": "Genre hinzufügen…"
+  },
+  "artist": {
+    "searchPlaceholder": "Künstler suchen oder hinzufügen…",
+    "create": "+ \"{name}\" erstellen",
+    "roles": {
+      "artist": "Künstler",
+      "composer": "Komponist",
+      "arranger": "Arrangeur"
+    }
+  },
+  "musicbrainz": {
+    "title": "MusicBrainz-Suche",
+    "searching": "MusicBrainz wird durchsucht…",
+    "noResults": "Keine Ergebnisse gefunden.",
+    "use": "Verwenden"
   },
   "formats": {
     "CD": "CD",

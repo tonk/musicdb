@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useArtistsStore } from '../../stores/artists'
 import type { Artist } from '../../types'
 
@@ -17,7 +18,10 @@ const emit = defineEmits<{
   'update:modelValue': [value: ArtistEntry[]]
 }>()
 
+const { t } = useI18n()
 const artistsStore = useArtistsStore()
+
+const ROLES = ['artist', 'composer', 'arranger'] as const
 
 const inputText = ref('')
 const suggestions = ref<Artist[]>([])
@@ -84,9 +88,7 @@ function updateRole(index: number, role: string) {
           @change="updateRole(i, ($event.target as HTMLSelectElement).value)"
           style="border: none; background: transparent; font-size: 11px; color: var(--color-text-muted); padding: 0; cursor: pointer;"
         >
-          <option value="artist">artist</option>
-          <option value="composer">composer</option>
-          <option value="arranger">arranger</option>
+          <option v-for="role in ROLES" :key="role" :value="role">{{ t(`artist.roles.${role}`) }}</option>
         </select>
         <span class="chip-dismiss" @click="remove(i)">✕</span>
       </div>
@@ -94,15 +96,13 @@ function updateRole(index: number, role: string) {
 
     <div style="display: flex; gap: 8px; align-items: center; position: relative;">
       <select v-model="activeRole" class="form-control" style="width: auto; flex-shrink: 0;">
-        <option value="artist">artist</option>
-        <option value="composer">composer</option>
-        <option value="arranger">arranger</option>
+        <option v-for="role in ROLES" :key="role" :value="role">{{ t(`artist.roles.${role}`) }}</option>
       </select>
       <div style="position: relative; flex: 1;">
         <input
           v-model="inputText"
           class="form-control"
-          placeholder="Search or add artist…"
+          :placeholder="t('artist.searchPlaceholder')"
           @keydown.enter.prevent="addNew"
           @keydown.escape="showSuggestions = false"
           @focus="showSuggestions = suggestions.length > 0"
@@ -110,33 +110,58 @@ function updateRole(index: number, role: string) {
         />
         <ul
           v-if="showSuggestions"
-          style="position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
-                 background: var(--color-surface); border: 1px solid var(--color-border);
-                 border-radius: var(--radius-sm); margin: 2px 0; padding: 4px 0; list-style: none;
-                 box-shadow: var(--shadow-md); max-height: 200px; overflow-y: auto;"
+          class="suggestion-list"
         >
           <li
             v-for="artist in suggestions"
             :key="artist.id"
+            class="suggestion-item"
             @mousedown.prevent="selectSuggestion(artist)"
-            style="padding: 8px 12px; cursor: pointer;"
-            onmouseover="this.style.background='var(--color-bg-secondary)'"
-            onmouseout="this.style.background=''"
           >
             {{ artist.name }}
             <span style="font-size: 11px; color: var(--color-text-faint);">{{ artist.sort_name }}</span>
           </li>
           <li
             v-if="inputText.trim() && !suggestions.some(s => s.name.toLowerCase() === inputText.trim().toLowerCase())"
+            class="suggestion-item suggestion-item--create"
             @mousedown.prevent="addNew"
-            style="padding: 8px 12px; cursor: pointer; color: var(--color-accent);"
-            onmouseover="this.style.background='var(--color-bg-secondary)'"
-            onmouseout="this.style.background=''"
           >
-            + Create "{{ inputText.trim() }}"
+            {{ t('artist.create', { name: inputText.trim() }) }}
           </li>
         </ul>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.suggestion-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin: 2px 0;
+  padding: 4px 0;
+  list-style: none;
+  box-shadow: var(--shadow-md);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.suggestion-item--create {
+  color: var(--color-accent);
+}
+</style>

@@ -1,3 +1,4 @@
+use sqlx::AssertSqlSafe;
 use tauri::State;
 
 use crate::{
@@ -18,7 +19,7 @@ pub async fn list_artists(state: State<'_, AppState>) -> Result<Vec<Artist>> {
            FROM artists
            ORDER BY {FOLDED_SORT_NAME_SQL}, sort_name COLLATE NOCASE"#
     );
-    let rows = sqlx::query(&query)
+    let rows = sqlx::query(AssertSqlSafe(query))
     .fetch_all(&db)
     .await?;
 
@@ -48,7 +49,7 @@ pub async fn autocomplete_artists(
            ORDER BY {FOLDED_SORT_NAME_SQL}, sort_name COLLATE NOCASE
            LIMIT 20"#
     );
-    let rows = sqlx::query(&query)
+    let rows = sqlx::query(AssertSqlSafe(query))
     .bind(&pattern)
     .bind(&pattern)
     .fetch_all(&db)

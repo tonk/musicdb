@@ -63,8 +63,8 @@ function clear() {
     <div class="form-group" style="margin-bottom: 0;">
       <label class="form-label">{{ t('item.year') }}</label>
       <div style="display: flex; gap: 4px;">
-        <input v-model="yearFrom" class="form-control" type="number" placeholder="from" style="font-size: 12px;" />
-        <input v-model="yearTo"   class="form-control" type="number" placeholder="to"   style="font-size: 12px;" />
+        <input v-model="yearFrom" class="form-control" type="number" :placeholder="t('collection.yearFrom')" style="font-size: 12px;" />
+        <input v-model="yearTo"   class="form-control" type="number" :placeholder="t('collection.yearTo')"   style="font-size: 12px;" />
       </div>
     </div>
 

@@ -1,3 +1,4 @@
+use sqlx::AssertSqlSafe;
 use tauri::State;
 
 use crate::{
@@ -464,11 +465,11 @@ pub async fn list_items(
     );
     let count_str = format!("SELECT COUNT(*) FROM items i WHERE {where_clause}");
 
-    let total: i64 = sqlx::query_scalar(&count_str)
+    let total: i64 = sqlx::query_scalar(AssertSqlSafe(count_str))
         .fetch_one(&db)
         .await?;
 
-    let rows = sqlx::query(&query_str).fetch_all(&db).await?;
+    let rows = sqlx::query(AssertSqlSafe(query_str)).fetch_all(&db).await?;
 
     use sqlx::Row;
     let items = rows

@@ -7,6 +7,7 @@ import { useSettingsStore } from '../stores/settings'
 import { useCollectionStore } from '../stores/collection'
 import { useUpdateStore } from '../stores/update'
 import { openUrl } from '@tauri-apps/plugin-opener'
+import type { DatabaseEntry } from '../types'
 
 const { t, locale } = useI18n()
 const settings = useSettingsStore()
@@ -106,8 +107,6 @@ async function backupDb() {
 watch(() => settings.language, lang => { locale.value = lang }, { immediate: true })
 
 // ── Multi-database management ─────────────────────────────────────────────────
-interface DatabaseEntry { name: string; path: string }
-
 const databases      = ref<DatabaseEntry[]>([])
 const currentDb      = ref('')
 const newDbName      = ref('')
